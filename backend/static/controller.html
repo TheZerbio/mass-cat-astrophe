@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#111">
+<title>CATastrophe Controller</title>
+<style>
+  :root { --c: #888; }
+  html, body {
+    margin: 0; height: 100%; background: #111; color: #eee;
+    font-family: system-ui, sans-serif; overflow: hidden;
+    touch-action: none; user-select: none; -webkit-user-select: none;
+    -webkit-touch-callout: none; overscroll-behavior: none;
+  }
+  #top {
+    position: fixed; top: 0; left: 0; right: 0; padding: 14px 16px;
+    display: flex; justify-content: space-between; align-items: center; gap: 12px;
+    font-size: 18px; z-index: 1;
+  }
+  #name { font-weight: 700; color: var(--c); }
+  #conn { font-size: 14px; opacity: .7; }
+  #pad { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; }
+  #base {
+    width: min(78vw, 70vh); aspect-ratio: 1; border-radius: 50%; position: relative;
+    background: radial-gradient(circle, #262626 0%, #1a1a1a 70%); border: 4px solid var(--c);
+  }
+  #knob {
+    position: absolute; width: 38%; height: 38%; border-radius: 50%; left: 50%; top: 50%;
+    transform: translate(-50%, -50%); background: var(--c); box-shadow: 0 4px 18px #0008;
+  }
+  #bottom {
+    position: fixed; bottom: 0; left: 0; right: 0; padding: 16px; text-align: center;
+  }
+  #meter { height: 10px; background: #2a2a2a; border-radius: 5px; overflow: hidden; margin: 8px auto 0; max-width: 320px; }
+  #meterFill { height: 100%; width: 0; background: var(--c); transition: width .25s; }
+  #stats { font-size: 15px; opacity: .85; }
+</style>
+</head>
+<body>
+<div id="top"><span id="name">Connecting…</span><span id="conn">offline</span></div>
+<div id="pad"><div id="base"><div id="knob"></div></div></div>
+<div id="bottom">
+  <div id="stats">Move the stick together with the others!</div>
+  <div id="meter"><div id="meterFill"></div></div>
+</div>
+<script>
+const $ = id => document.getElementById(id);
+const pad = $('pad'), base = $('base'), knob = $('knob');
+const store = {
+  get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch {} },
+};
+
+let ws = null, cur = { x: 0, y: 0 }, dirty = false, activePointer = null, lastSent = 0;
+
+function connect() {
+  const p = new URLSearchParams();
+  const id = store.get('catastrophe.playerId');
+  if (id) p.set('id', id);
+  const name = new URLSearchParams(location.search).get('name');
+  if (name) p.set('name', name);
+  ws = new WebSocket((location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/ws/controller?' + p);
+  ws.onopen = () => { $('conn').textContent = 'connected'; dirty = true; };
+  ws.onclose = () => { $('conn').textContent = 'reconnecting…'; setTimeout(connect, 1000); };
+  ws.onmessage = e => {
+    const m = JSON.parse(e.data);
+    if (m.type === 'welcome') {
+      store.set('catastrophe.playerId', m.id);
+      $('name').textContent = m.name;
+      document.documentElement.style.setProperty('--c', m.color);
+      if (navigator.vibrate) navigator.vibrate(60);
+    } else if (m.type === 'status') {
+      const acc = m.accuracy == null ? null : Math.round(m.accuracy * 100);
+      $('stats').textContent =
+        `#${m.rank} of ${m.connectedPlayers} · ${m.score.toFixed(1)} pts · ` +
+        (acc == null ? 'idle' : `in sync ${acc}%`);
+      $('meterFill').style.width = (acc ?? 0) + '%';
+    }
+  };
+}
+
+function setStick(dx, dy) {
+  const len = Math.hypot(dx, dy);
+  if (len > 1) { dx /= len; dy /= len; }
+  cur = { x: dx, y: -dy }; // y up is positive (like Unity)
+  knob.style.left = (50 + dx * 50) + '%';
+  knob.style.top = (50 + dy * 50) + '%';
+  dirty = true;
+}
+
+function fromPointer(e) {
+  const r = base.getBoundingClientRect(), R = r.width / 2;
+  setStick((e.clientX - r.left - R) / R, (e.clientY - r.top - R) / R);
+}
+
+pad.addEventListener('pointerdown', e => {
+  if (activePointer !== null) return;
+  activePointer = e.pointerId;
+  pad.setPointerCapture(e.pointerId);
+  fromPointer(e);
+});
+pad.addEventListener('pointermove', e => { if (e.pointerId === activePointer) fromPointer(e); });
+const release = e => { if (e.pointerId === activePointer) { activePointer = null; setStick(0, 0); } };
+pad.addEventListener('pointerup', release);
+pad.addEventListener('pointercancel', release);
+document.addEventListener('contextmenu', e => e.preventDefault());
+
+// Send changes at most ~30x/s, and a keep-alive of the current value every 500ms.
+setInterval(() => {
+  const now = performance.now();
+  if (!ws || ws.readyState !== WebSocket.OPEN) return;
+  if (dirty || now - lastSent > 500) {
+    ws.send(JSON.stringify([+cur.x.toFixed(3), +cur.y.toFixed(3)]));
+    dirty = false; lastSent = now;
+  }
+}, 33);
+
+// If the phone locks or the tab is hidden, let go of the stick.
+document.addEventListener('visibilitychange', () => { if (document.hidden) { activePointer = null; setStick(0, 0); } });
+
+connect();
+</script>
+</body>
+</html>

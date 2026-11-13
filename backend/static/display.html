@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CATastrophe Lobby</title>
+<style>
+  html, body { margin: 0; min-height: 100%; background: #111; color: #eee; font-family: system-ui, sans-serif; }
+  main { display: flex; flex-wrap: wrap; gap: 32px; justify-content: center; align-items: flex-start; padding: 32px 16px; }
+  .card { background: #1b1b1b; border-radius: 16px; padding: 24px; }
+  h1 { text-align: center; margin: 24px 0 0; font-size: 40px; }
+  #qr { background: #fff; border-radius: 12px; display: block; width: 320px; height: 320px; }
+  #url { margin-top: 12px; text-align: center; font-family: ui-monospace, monospace; font-size: 15px; word-break: break-all; max-width: 320px; }
+  canvas { display: block; }
+  table { border-collapse: collapse; min-width: 320px; }
+  th, td { padding: 6px 10px; text-align: left; }
+  th { font-size: 13px; opacity: .6; font-weight: 600; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; vertical-align: middle; }
+  tr.off { opacity: .35; }
+  button { margin-top: 12px; background: #333; color: #eee; border: 0; border-radius: 8px; padding: 8px 14px; cursor: pointer; }
+  #state { text-align: center; font-size: 14px; opacity: .6; margin-top: 8px; }
+</style>
+</head>
+<body>
+<h1>Scan to join</h1>
+<main>
+  <div class="card">
+    <img id="qr" src="/qr.svg" alt="QR code to join">
+    <div id="url"></div>
+  </div>
+  <div class="card">
+    <canvas id="viz" width="320" height="320"></canvas>
+    <div id="state">waiting for players…</div>
+  </div>
+  <div class="card">
+    <table>
+      <thead><tr><th>#</th><th>Player</th><th class="num">Sync</th><th class="num">Avg</th><th class="num">Points</th></tr></thead>
+      <tbody id="scores"></tbody>
+    </table>
+    <button id="reset">Reset scores</button>
+  </div>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+const colors = {};
+let lastTick = null;
+
+fetch('/api/info').then(r => r.json()).then(i => $('url').textContent = i.joinUrl);
+$('reset').onclick = () => fetch('/api/scores/reset', { method: 'POST' });
+
+function connect() {
+  const ws = new WebSocket((location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/ws/game');
+  ws.onclose = () => setTimeout(connect, 1000);
+  ws.onmessage = e => {
+    const m = JSON.parse(e.data);
+    if (m.type === 'tick') lastTick = m;
+    else if (m.type === 'scores') renderScores(m.players);
+  };
+}
+
+function renderScores(players) {
+  const esc = s => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  $('scores').innerHTML = players.map(p => {
+    colors[p.id] = p.color;
+    const acc = p.accuracy == null ? '–' : Math.round(p.accuracy * 100) + '%';
+    return `<tr class="${p.connected ? '' : 'off'}"><td>${p.rank}</td>` +
+      `<td><span class="dot" style="background:${p.color}"></span>${esc(p.name)}</td>` +
+      `<td class="num">${acc}</td><td class="num">${Math.round(p.averageAccuracy * 100)}%</td>` +
+      `<td class="num">${p.score.toFixed(1)}</td></tr>`;
+  }).join('');
+}
+
+const cv = $('viz'), ctx = cv.getContext('2d');
+function draw() {
+  const W = cv.width, R = W / 2 - 14, c = W / 2;
+  ctx.clearRect(0, 0, W, W);
+  ctx.strokeStyle = '#444'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(c, c, R, 0, Math.PI * 2); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(c - R, c); ctx.lineTo(c + R, c); ctx.moveTo(c, c - R); ctx.lineTo(c, c + R); ctx.stroke();
+  if (lastTick) {
+    for (const p of lastTick.players) {
+      ctx.fillStyle = colors[p.id] || '#888';
+      ctx.beginPath(); ctx.arc(c + p.x * R, c - p.y * R, 9, 0, Math.PI * 2); ctx.fill();
+    }
+    const x = c + lastTick.x * R, y = c - lastTick.y * R;
+    ctx.strokeStyle = '#fff'; ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.moveTo(c, c); ctx.lineTo(x, y); ctx.stroke();
+    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(x, y, 6, 0, Math.PI * 2); ctx.fill();
+    $('state').textContent = `${lastTick.connectedPlayers} connected · ${lastTick.activePlayers} steering`;
+  }
+  requestAnimationFrame(draw);
+}
+
+connect();
+draw();
+</script>
+</body>
+</html>
