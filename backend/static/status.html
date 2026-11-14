@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="refresh" content="2">
+  <title>Game Status</title>
+  <link rel="stylesheet" href="/status.css">
+</head>
+<body>
+  <h1>Games</h1>
+  <!-- TEMP: remove later -->
+  <button class="new-game" onclick="newGame()">+ new game</button>
+  <div class="games">
+    {{GAMES}}
+  </div>
+  <script>
+    // TEMP: remove later
+    async function newGame() {
+      await fetch("/game/new", { method: "POST" });
+      location.reload();
+    }
+
+    async function elevate(gameId, name) {
+      await fetch(`/game/${gameId}/elevate/${encodeURIComponent(name)}`, { method: "POST" });
+      location.reload();
+    }
+
+    async function kick(gameId, name) {
+      await fetch(`/game/${gameId}/kick/${encodeURIComponent(name)}`, { method: "POST" });
+      location.reload();
+    }
+
+    async function closeGame(gameId) {
+      await fetch(`/game/${gameId}/close`, { method: "POST" });
+      location.reload();
+    }
+  </script>
+</body>
+</html>

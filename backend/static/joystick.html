@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- without this, phones render the page zoomed out at desktop width -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>CAT-astrophe</title>
+    <style>
+        html, body {
+            margin: 0;
+            height: 100%;
+            font-family: system-ui, sans-serif;
+            overflow: hidden;              /* no scrolling while dragging */
+            user-select: none;             /* no text selection on long press */
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;   /* no iOS "copy/share" popup */
+            overscroll-behavior: none;     /* no pull-to-refresh */
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 24px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 22px;
+            text-align: center;
+        }
+
+        #joy_base {
+            position: relative;            /* knob is positioned relative to this */
+            width: min(80vw, 70vh);
+            aspect-ratio: 1;               /* always a square -> circle */
+            border-radius: 50%;
+            /* mid-grey with alpha: darkens light backgrounds, lightens dark ones */
+            background: radial-gradient(circle, rgba(128, 128, 128, 0.35) 0%, rgba(128, 128, 128, 0.2) 70%);
+            border: 4px solid rgba(128, 128, 128, 0.6);
+            touch-action: none;            /* browser must not scroll/zoom on touch */
+            max-width: 500px;
+        }
+
+        #joy_knob {
+            position: absolute;
+            left: 50%;                     /* JS changes left/top */
+            top: 50%;
+            width: 38%;
+            height: 38%;
+            border-radius: 50%;
+            transform: translate(-50%, -50%); /* left/top point to the knob's center */
+            /* silver: light spot top-left fading to darker grey = metallic dome */
+            background: radial-gradient(circle at 35% 30%, #ffffff 0%, #e0e0e0 20%, #a8a8a8 60%, #7a7a7a 100%);
+            border: 1px solid rgba(0, 0, 0, 0.25);
+            box-shadow:
+                0 6px 14px rgba(0, 0, 0, 0.45),            /* drop shadow below the knob */
+                inset 0 -4px 8px rgba(0, 0, 0, 0.25),      /* darker bottom edge */
+                inset 0 3px 6px rgba(255, 255, 255, 0.6);  /* bright top rim */
+
+        }
+    </style>
+</head>
+<body>
+    <h1>That's all we have game for today!</h1>
+    <div id="joy_base"><div id="joy_knob"></div></div>
+    <script>
+        let url_params = new URLSearchParams(window.location.search);
+        // general data
+        let game_id = url_params.get('game_id');
+        let player_id = url_params.get('player_id');
+
+        let joy_pos = {x:0., y:0.}
+        let joy_elmt = document.getElementById('joy_knob');
+        let joy_base_elmt = document.getElementById('joy_base');
+
+
+        function get_center(element){
+            return {x:element.x+element.width/2, y:element.y+element.height/2};
+        }
+        function update_joy_pos(mouse_pos) {
+            const radius = joy_base_elmt.getBoundingClientRect().width / 2;
+            const joy_base_pos = joy_base_elmt.getBoundingClientRect();
+
+            joy_pos.x = (mouse_pos.x - get_center(joy_base_pos).x) / radius;
+            joy_pos.y = (mouse_pos.y - get_center(joy_base_pos).y) / radius;
+            // clamp to circle
+
+            set_knop_pos()
+
+        }
+        function set_knop_pos(){
+            const dist = Math.hypot(joy_pos.x, joy_pos.y);
+            if (dist > 1) {
+                joy_pos.x /= dist;
+                joy_pos.y /= dist;
+            }
+            joy_elmt.style.left = (50 + joy_pos.x * 50) + "%";
+            joy_elmt.style.top  = (50 + joy_pos.y * 50) + "%";
+        }
+
+        let is_dragging = false;
+        joy_elmt.addEventListener('pointerdown', (e) => {is_dragging = true;});
+        document.addEventListener('pointerup', (e) => {is_dragging = false;requestAnimationFrame(return_knot_to_center)});
+        document.addEventListener('pointercancel', (e)=>{is_dragging = false;requestAnimationFrame(return_knot_to_center)});
+        document.addEventListener('pointermove', (e) => {capture_joy_drag(e)});
+        function capture_joy_drag(event){
+            if (!is_dragging)  return;
+            let pointer_pos = {x: event.clientX, y: event.clientY};
+            update_joy_pos(pointer_pos);
+        }
+         function return_knot_to_center(){
+            if (is_dragging)  return;
+            const return_speed = 0.75
+            joy_pos.x *= return_speed;
+            joy_pos.y *= return_speed;
+             joy_elmt.style.left = (50 + joy_pos.x * 50) + "%";
+             joy_elmt.style.top  = (50 + joy_pos.y * 50) + "%";
+             if (Math.hypot(joy_pos.x, joy_pos.y) >= 0.01)
+                 requestAnimationFrame(return_knot_to_center)
+         }
+
+         let keys = new Set()
+         document.addEventListener('keypress', (e) => {keys.add(e.code); update_joy_keys();});
+        document.addEventListener("keyup",   e => { keys.delete(e.code); update_joy_keys();});
+            function update_joy_keys(){
+                //console.log(keys);
+                let x = 0, y = 0;
+                if (keys.has("KeyA")) x -= 1;
+                if (keys.has("KeyD")) x += 1;
+                if (keys.has("KeyW")) y -= 1;   // screen coordinates: up is negative, like your joy_pos
+                if (keys.has("KeyS")) y += 1;
+                set_knop_pos();
+            }
+
+
+    </script>
+</body>
+</html>
