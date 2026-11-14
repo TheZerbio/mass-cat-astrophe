@@ -44,7 +44,6 @@ namespace Assets.Scripts
             //Testing:
             interaction = InputSystem.actions.FindAction("Interact");
             interaction.started += _ => PlayMeow();
-            interaction.performed += _ => SceneManager.LoadScene(("TestScene2"));
         }
 
         void FixedUpdate()

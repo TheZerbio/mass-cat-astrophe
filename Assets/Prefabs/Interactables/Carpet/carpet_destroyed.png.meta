@@ -1,19 +1,10 @@
 fileFormatVersion: 2
-guid: edd0a6554e8324ea1af9daeb590905aa
+guid: fccedae6416b346bab75859d1714d675
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 3596285860649878770
-    second: PflanzeUmgefallen_0
-  - first:
-      213: 6265345322445800370
-    second: PflanzeUmgefallen_1
-  - first:
-      213: -8133411688026727881
-    second: PflanzeUmgefallen_2
-  - first:
-      213: -3228972098157911738
-    second: PflanzeUmgefallen_3
+      213: -6949419149618890750
+    second: Destroyed_Oriental_Rug_with_Cat_Damage-removebg-preview_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -120,93 +111,40 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: PflanzeUmgefallen_0
+      name: Destroyed_Oriental_Rug_with_Cat_Damage-removebg-preview_0
       rect:
         serializedVersion: 2
-        x: 116
-        y: 432
-        width: 1446
-        height: 717
+        x: 96
+        y: 71
+        width: 374
+        height: 280
       alignment: 0
-      pivot: {x: 0, y: 0}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 2f4cbc2bfe298e130800000000000000
-      internalID: 3596285860649878770
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: PflanzeUmgefallen_1
-      rect:
-        serializedVersion: 2
-        x: 1291
-        y: 1107
-        width: 27
-        height: 29
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 2b38983206af2f650800000000000000
-      internalID: 6265345322445800370
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: PflanzeUmgefallen_2
-      rect:
-        serializedVersion: 2
-        x: 367
-        y: 1036
-        width: 13
-        height: 12
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 73a18239921502f80800000000000000
-      internalID: -8133411688026727881
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: PflanzeUmgefallen_3
-      rect:
-        serializedVersion: 2
-        x: 1559
-        y: 460
-        width: 11
-        height: 6
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 64166ab0cf26033d0800000000000000
-      internalID: -3228972098157911738
+      spriteID: 2083baf5a14be8f90800000000000000
+      internalID: -6949419149618890750
       vertices: []
       indices: 
       edges: []
@@ -215,7 +153,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: ea56b844794d744aca1abe81a73b6489
     internalID: 0
     vertices: []
     indices: 
@@ -225,10 +163,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      PflanzeUmgefallen_0: 3596285860649878770
-      PflanzeUmgefallen_1: 6265345322445800370
-      PflanzeUmgefallen_2: -8133411688026727881
-      PflanzeUmgefallen_3: -3228972098157911738
+      Destroyed_Oriental_Rug_with_Cat_Damage-removebg-preview_0: -6949419149618890750
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

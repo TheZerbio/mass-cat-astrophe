@@ -9,6 +9,7 @@ using UnityEngine.InputSystem.Users;
 public class FixedVectorInput : MonoBehaviour
 {
     VirtualMoveDevice device;
+    public Vector2 movement = new Vector2(0, 0);
 
     void OnEnable()
     {
@@ -25,9 +26,9 @@ public class FixedVectorInput : MonoBehaviour
         if (device != null) InputSystem.RemoveDevice(device);
     }
 
-    void Update()
+    void FixedUpdate()
     {
         // Any Vector2 you want
-        InputState.Change(device.move, new Vector2(0, 0));
+        InputState.Change(device.move, movement);
     }
 }

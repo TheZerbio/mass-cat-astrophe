@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 88044b2160e9e45549f03b5af2ba9e07
+guid: 9836387bf02f54e66b6df44faa85d1f4
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 1080075188040119766
-    second: soft-red-carpet-pattern-isolated-260nw-2671264785-removebg-preview_0
+      213: -6288179971597629913
+    second: Sofa_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -111,17 +111,30 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: soft-red-carpet-pattern-isolated-260nw-2671264785-removebg-preview_0
+      name: Sofa_0
       rect:
         serializedVersion: 2
-        x: 34
-        y: 52
-        width: 296
-        height: 198
+        x: 27
+        y: 75
+        width: 2072
+        height: 1382
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -130,8 +143,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 6d538d939a23dfe00800000000000000
-      internalID: 1080075188040119766
+      spriteID: 726823dc1a5ebb8a0800000000000000
+      internalID: -6288179971597629913
       vertices: []
       indices: 
       edges: []
@@ -150,7 +163,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      soft-red-carpet-pattern-isolated-260nw-2671264785-removebg-preview_0: 1080075188040119766
+      Sofa_0: -6288179971597629913
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

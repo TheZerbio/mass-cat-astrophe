@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 1710104266514637471}
   - component: {fileID: 6760174223424580193}
   - component: {fileID: 7863137413411952183}
+  - component: {fileID: 6331615803906737518}
   m_Layer: 0
   m_Name: PersistantGameObjects
   m_TagString: Untagged
@@ -50,6 +51,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1b4c75b50e2c432cb9f8ccb12a5cd44c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MainAudioManager
+  SfxManager: {fileID: 0}
+  CatSoundManager: {fileID: 0}
+  BackgroundAudioManager: {fileID: 0}
   musicVolume: 0.4
   catVolume: 1
   sfxVolume: 1
@@ -67,6 +71,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
   destructionScore: 0
+  Sounds: {fileID: 0}
+  Network: {fileID: 0}
 --- !u!114 &1163110359434017881
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -79,6 +85,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b0593ccd5746d9647b99eccffe5e06d4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Scripts.NetworkManager
+  disableWebsocket: 0
 --- !u!114 &209735975406644541
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -132,3 +139,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 575ee7d079a307340be68eea007974cc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
+--- !u!114 &6331615803906737518
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7233507596536867270}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b60871d4f364342a9a50558912a5b2fd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FixedVectorInput

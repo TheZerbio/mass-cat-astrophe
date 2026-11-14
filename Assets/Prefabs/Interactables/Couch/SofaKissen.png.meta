@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 3a88436951b3f416cbd120f54a8c9767
+guid: f350dd4161bb04b3e9344850e9478e70
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 1861538009206935555
-    second: Pflanze_0
+      213: -4071589923349324594
+    second: SofaKissen_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -111,17 +111,30 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Pflanze_0
+      name: SofaKissen_0
       rect:
         serializedVersion: 2
-        x: 481
-        y: 52
-        width: 746
-        height: 1472
+        x: 1479
+        y: 643
+        width: 410
+        height: 410
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -130,8 +143,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 300daaed4f285d910800000000000000
-      internalID: 1861538009206935555
+      spriteID: ecc14b3798ece77c0800000000000000
+      internalID: -4071589923349324594
       vertices: []
       indices: 
       edges: []
@@ -150,7 +163,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Pflanze_0: 1861538009206935555
+      SofaKissen_0: -4071589923349324594
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

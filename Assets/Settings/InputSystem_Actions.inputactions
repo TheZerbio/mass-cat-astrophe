@@ -232,6 +232,17 @@
                 },
                 {
                     "name": "",
+                    "id": "e5baec41-b3f9-4c15-9ffd-e9e1a9455fef",
+                    "path": "<VirtualMoveDevice>/move",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Move",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "c1f7a91b-d0fd-4a62-997e-7fb9b69bf235",
                     "path": "<Gamepad>/rightStick",
                     "interactions": "",

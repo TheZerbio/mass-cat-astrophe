@@ -1,13 +1,10 @@
 fileFormatVersion: 2
-guid: 91a40c51cc33e491e93cb5fb4e0d8d61
+guid: a5a679db9002041d7a8bc50874647fc3
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -8857846866928009903
-    second: cat_1_0
-  - first:
-      213: -1575492056476210536
-    second: cat_1_1
+      213: 3408727420808655620
+    second: PflanzeGegessen_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -114,17 +111,30 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: cat_1_0
+      name: PflanzeGegessen_0
       rect:
         serializedVersion: 2
-        x: 14
-        y: 0
-        width: 590
-        height: 511
+        x: 481
+        y: 52
+        width: 727
+        height: 1472
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -133,30 +143,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 15df2f5943b921580800000000000000
-      internalID: -8857846866928009903
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: cat_1_1
-      rect:
-        serializedVersion: 2
-        x: 429
-        y: 3
-        width: 16
-        height: 6
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 89a294b625ab22ae0800000000000000
-      internalID: -1575492056476210536
+      spriteID: 403fe6d678b3e4f20800000000000000
+      internalID: 3408727420808655620
       vertices: []
       indices: 
       edges: []
@@ -175,8 +163,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      cat_1_0: -8857846866928009903
-      cat_1_1: -1575492056476210536
+      PflanzeGegessen_0: 3408727420808655620
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -2,7 +2,7 @@ using UnityEngine;
 using NativeWebSocket;
 using UnityEngine.Serialization;
 
-[RequireComponent(typeof(GameManager))]
+[RequireComponent(typeof(GameManager),typeof(FixedVectorInput))]
 public class NetworkManager : MonoBehaviour
 {
     private GUID _guid;
@@ -15,8 +15,21 @@ public class NetworkManager : MonoBehaviour
     public bool disableWebsocket = false;
     private readonly string _baseURL = WebConfig.WebsocketBaseURL;
     private GameManager _gameManager;
-    
-    
+    private  FixedVectorInput _fixedVectorInput;
+    public int ActiveInputs { get; private set; }
+
+    [System.Serializable]
+    private class WSPayload
+    {
+        public float x;
+        public float y;
+        public int num_inputs;
+
+        public string toString()
+        {
+            return $"WSPayload: {{x:{x},y:{y},num_inputs:{num_inputs}}}";
+        }
+    }
     /* Read from Websocket like that
      * websocket.OnMessage += (bytes) =>
         {
@@ -27,6 +40,7 @@ public class NetworkManager : MonoBehaviour
     void Start()
     {
         _gameManager = GetComponent<GameManager>();
+        _fixedVectorInput = GetComponent<FixedVectorInput>();
         
         _httpRequestManager = new HttpRequestManager(this);
         _httpRequestManager.CreateGame();
@@ -74,6 +88,9 @@ public class NetworkManager : MonoBehaviour
         {
             var message = System.Text.Encoding.UTF8.GetString(bytes);
             Debug.Log("Received: " + message);
+            WSPayload payload = JsonUtility.FromJson<WSPayload>(message);
+            Debug.Log(payload.toString());
+            _fixedVectorInput.movement= new Vector2(payload.x,payload.y);
         };
     }
     
