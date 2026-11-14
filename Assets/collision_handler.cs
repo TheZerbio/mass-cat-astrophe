@@ -35,6 +35,7 @@ public class Destroyable : MonoBehaviour
         }
     }
 
+
     void Destroy_()
     {
         isDestroyed = true;

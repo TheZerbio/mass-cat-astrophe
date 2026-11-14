@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 2254564813131868762}
   - component: {fileID: 150391907096265205}
   - component: {fileID: 9080559093880188868}
+  - component: {fileID: -6501383824216714732}
   m_Layer: 0
   m_Name: couch_template
   m_TagString: Untagged
@@ -154,3 +155,25 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   isDestroyed: 0
   destroyedSprite: {fileID: 2275383279288507240, guid: 1dcc1d495e63f424b890a80563e58888, type: 3}
+  smokePrefab: {fileID: 0}
+--- !u!114 &-6501383824216714732
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6959182069346895302}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 04320200ce2e5472fb9132c698efb8a2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::JoystickDecisionDialog
+  moveAction: {fileID: 0}
+  panel: {fileID: 0}
+  messageText: {fileID: 0}
+  timerText: {fileID: 0}
+  slots: []
+  holdTime: 1.5
+  timeLimit: 6
+  deadzone: 0.6
+  angleTolerance: 40
