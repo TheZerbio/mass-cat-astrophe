@@ -17,7 +17,7 @@ GameObject:
   - component: {fileID: 6760174223424580193}
   - component: {fileID: 7863137413411952183}
   m_Layer: 0
-  m_Name: PersistantGameOnjects
+  m_Name: PersistantGameObjects
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
