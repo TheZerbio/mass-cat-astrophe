@@ -1,31 +1,45 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
-using UnityEngine.InputSystem.LowLevel;
-using UnityEngine.SceneManagement;
+using NativeWebSocket;
 
-namespace Assets.Scripts
+
+public class NetworkManager : MonoBehaviour
 {
-    public class NetworkManager : MonoBehaviour
+    private GUID guid;
+    WebSocket websocket;
+    
+    async void Start()
     {
-        private GUID guid;
-        
-        InputAction interactAction;
-        // Start is called once before the first execution of Update after the MonoBehaviour is created
-        void Start()
-        {
-            guid = GUID.Generate();
-            interactAction = InputSystem.actions.FindAction("Interact");
-            //interactAction.performed += ctx => { SceneManager.LoadScene("TestScene2");};
-        }
+        Application.runInBackground = true; // Recommended for WebGL
 
-        // Update is called once per frame
-        void Update()
-        {
-  
-        }
+        websocket = new WebSocket("ws://localhost:3000");
 
-        void FixedUpdate()
+        websocket.OnOpen += () => Debug.Log("Connection open!");
+        websocket.OnError += (e) => Debug.Log("Error! " + e);
+        websocket.OnClose += (code) => Debug.Log("Connection closed!");
+
+        websocket.OnMessage += (bytes) =>
         {
+            var message = System.Text.Encoding.UTF8.GetString(bytes);
+            Debug.Log("Received: " + message);
+        };
+
+        await websocket.Connect();
+    }
+
+    async void SendWebSocketMessage(string message)
+    {
+        if (websocket.State == WebSocketState.Open)
+        {
+            await websocket.SendText(message);
         }
+        else
+        {
+            Debug.LogError("WebSocket is not open!");
+        }
+    }
+
+    private async void OnApplicationQuit()
+    {
+        await websocket.Close();
     }
 }
