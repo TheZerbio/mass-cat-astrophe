@@ -1,4 +1,0 @@
-repository "Mass-Cat-astrophe/Mass-Cat-astrophe@9071314285699@cloud"
-  path "/"
-    br "/main"
-    co "/main"
