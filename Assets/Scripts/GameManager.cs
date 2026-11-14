@@ -29,8 +29,9 @@ public class GameManager : MonoBehaviour
         {
                 if (Instance != null && Instance != this)
                 {
+                        gameObject.SetActive(false); // stop sibling components (input, network) right away
                         Destroy(gameObject);
-                        return;               // stop here so the duplicate doesn't keep initialising
+                        return;              // stop here so the duplicate doesn't keep initialising
                 }
                 Instance = this;
                 DontDestroyOnLoad(gameObject);

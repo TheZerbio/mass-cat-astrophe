@@ -27,6 +27,7 @@ public class HttpRequestManager
 
     public void CreateGame() => runner.StartCoroutine(CreateGameRoutine());
     public void StopGame() => runner.StartCoroutine(StopGameRoutine());
+    public void StartGame() => runner.StartCoroutine(StartGameRoutine());
 
     private IEnumerator CreateGameRoutine()
     {
@@ -57,15 +58,28 @@ public class HttpRequestManager
 
             if (request.result != UnityWebRequest.Result.Success)
             {
-                string msg = $"CreateGame failed: {request.responseCode} {request.error}\n{request.downloadHandler.text}";
+                string msg = $"CloseGame failed: {request.responseCode} {request.error}\n{request.downloadHandler.text}";
                 Debug.LogError(msg);
                 OnError?.Invoke(msg);
                 yield break;
             }
+        }
+    }
+    
+    private IEnumerator StartGameRoutine()
+    {
+        if (HasGameId)
+        {
+            using var request = UnityWebRequest.Post($"{BaseUrl}/game/{GameId}/start", "{}", "application/json");
+            yield return request.SendWebRequest();
 
-            GameId = JsonUtility.FromJson<NewGameResponse>(request.downloadHandler.text).game_id;
-            HasGameId = true;
-            OnGameCreated?.Invoke(GameId);
+            if (request.result != UnityWebRequest.Result.Success)
+            {
+                string msg = $"StartGame failed: {request.responseCode} {request.error}\n{request.downloadHandler.text}";
+                Debug.LogError(msg);
+                OnError?.Invoke(msg);
+                yield break;
+            }
         }
     }
 }

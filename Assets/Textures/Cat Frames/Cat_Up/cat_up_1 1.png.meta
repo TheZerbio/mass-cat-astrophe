@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: d6cf006e785d8495e96921ba7c6fc856
+guid: 2b21721cf02f24bcc94f5e039dcd0067
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 8933856120126810003
-    second: cat_up_stand_0
+      213: -4676610434068121609
+    second: cat_up_1 1_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -111,11 +111,24 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: cat_up_stand_0
+      name: cat_up_1 1_0
       rect:
         serializedVersion: 2
         x: 148
@@ -130,8 +143,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 397ab92cece6bfb70800000000000000
-      internalID: 8933856120126810003
+      spriteID: 7f7fb748697591fb0800000000000000
+      internalID: -4676610434068121609
       vertices: []
       indices: 
       edges: []
@@ -150,7 +163,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      cat_up_stand_0: 8933856120126810003
+      cat_up_1 1_0: -4676610434068121609
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

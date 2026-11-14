@@ -53,8 +53,7 @@ public class MainAudioManager : MonoBehaviour
         {
                 ApplyVolume();
         }
-
-        [ContextMenu("Apply Volume")]
+        
         private void ApplyVolume()
         {
                 BackgroundSource.volume = volume*musicVolume;

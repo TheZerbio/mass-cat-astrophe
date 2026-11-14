@@ -28,6 +28,7 @@ public class QRCodeLoader : MonoBehaviour
 
     public void LoadLevel()
     {
+        gameManager.Network.StartGame();
         SceneManager.LoadScene("nics test and play scene");
     }
 

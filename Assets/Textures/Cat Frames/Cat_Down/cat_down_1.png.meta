@@ -1,13 +1,13 @@
 fileFormatVersion: 2
-guid: 679d592e840cc4b798e2b5836e5e6581
+guid: 3b3fc30c59e394152aa4deb189c7e82a
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -6966680833683747963
-    second: cat_down_2_0
+      213: -4130238597609245333
+    second: cat_down_1_0
   - first:
-      213: 1274850458459389390
-    second: cat_down_2_1
+      213: 3401209453684089255
+    second: cat_down_1_1
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -114,17 +114,30 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: cat_down_2_0
+      name: cat_down_1_0
       rect:
         serializedVersion: 2
         x: 148
-        y: 61
+        y: 59
         width: 330
-        height: 589
+        height: 602
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -133,20 +146,20 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 58b02cc51b0615f90800000000000000
-      internalID: -6966680833683747963
+      spriteID: b65b4efd0e17ea6c0800000000000000
+      internalID: -4130238597609245333
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: cat_down_2_1
+      name: cat_down_1_1
       rect:
         serializedVersion: 2
-        x: 316
+        x: 313
         y: 48
-        width: 19
-        height: 9
+        width: 28
+        height: 12
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -155,8 +168,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: ecd373eccbd21b110800000000000000
-      internalID: 1274850458459389390
+      spriteID: 7a16a8d4af5833f20800000000000000
+      internalID: 3401209453684089255
       vertices: []
       indices: 
       edges: []
@@ -175,8 +188,8 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      cat_down_2_0: -6966680833683747963
-      cat_down_2_1: 1274850458459389390
+      cat_down_1_0: -4130238597609245333
+      cat_down_1_1: 3401209453684089255
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
