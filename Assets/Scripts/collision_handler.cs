@@ -4,6 +4,7 @@ public class Destroyable : MonoBehaviour
 {
     public bool isDestroyed = false;
     public Sprite destroyedSprite;   // assign in the Inspector
+    public Sprite destroyedSprite2;
     public GameObject smokePrefab;
 
     private SpriteRenderer sr;
@@ -24,6 +25,8 @@ public class Destroyable : MonoBehaviour
         if (collision.gameObject.CompareTag("Player") && !isDestroyed)
         {
             Destroy_();
+            //Destroy(GetComponent<PolygonCollider2D>());
+            //gameObject.AddComponent<PolygonCollider2D>();
         }
     }
     
@@ -32,14 +35,19 @@ public class Destroyable : MonoBehaviour
         if (other.CompareTag("Player") && !isDestroyed)
         {
             Destroy_();
+            
         }
     }
 
-
-    void Destroy_()
+    //Change this to handle votes!
+    void Destroy_(bool alternate_destruction = true)
     {
         isDestroyed = true;
-        sr.sprite = destroyedSprite;
+        if(alternate_destruction && destroyedSprite2 != null){
+            sr.sprite = destroyedSprite2;
+        } else {
+            sr.sprite = destroyedSprite;
+        }
         gm.destructionScore += 67;
         gm.Sounds.CatSoundManager.PlayMeow();
         if (smokePrefab != null)
