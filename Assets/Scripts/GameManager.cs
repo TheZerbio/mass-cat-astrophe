@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-[RequireComponent(typeof(MainAudioManager))]
+[RequireComponent(typeof(MainAudioManager),typeof(NetworkManager))]
 public class GameManager : MonoBehaviour
 {
         //There will be exactly one instance of this Class that get initialized in the main menu/start scree -> Persists over all Scenes
@@ -9,6 +9,7 @@ public class GameManager : MonoBehaviour
         // Check for availability/null condition afterwards, Test Scenes require the PersistantGameObjects prefab to be placed
         public double destructionScore = 0.0;
         public MainAudioManager Sounds;
+        [System.NonSerialized] public int? gameId = null;
         
         /*
          * Exec Order Awake -> Start (once each)
