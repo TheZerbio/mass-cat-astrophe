@@ -12,6 +12,9 @@ public class Destroyable : MonoBehaviour
     void Awake()
     {
         gm = GameObject.Find("PersistantGameObjects").GetComponent<GameManager>();
+            if(gm == null){
+                Debug.Log("NO audio manager");
+            }
         sr = GetComponent<SpriteRenderer>();
     }
 
@@ -37,6 +40,7 @@ public class Destroyable : MonoBehaviour
         isDestroyed = true;
         sr.sprite = destroyedSprite;
         gm.destructionScore += 67;
+        gm.Sounds.CatSoundManager.PlayMeow();
         if (smokePrefab != null)
         {
             GameObject smoke = Instantiate(smokePrefab, transform.position, Quaternion.identity);

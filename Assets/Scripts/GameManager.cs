@@ -17,11 +17,11 @@ public class GameManager : MonoBehaviour
          */
         void Awake()
         {
-                Sounds=gameObject.GetComponent<MainAudioManager>();
+                
         }
         void Start()
         {
-                
+                Sounds=gameObject.GetComponent<MainAudioManager>();
         }
 
         void Update()
