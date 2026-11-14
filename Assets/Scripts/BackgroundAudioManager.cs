@@ -27,6 +27,7 @@ public class BackgroundAudioManager : MonoBehaviour
         BuildQueue();
         
         source.Play();
+        manager.BackgroundAudioManager = this;
     }
 
     private void FixedUpdate()

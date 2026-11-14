@@ -256,7 +256,7 @@ MonoBehaviour:
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
   m_Version: 2
---- !u!1001 &535104283
+--- !u!1001 &1132332366
 PrefabInstance:
   m_ObjectHideFlags: 0
   serializedVersion: 2
@@ -306,7 +306,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7233507596536867270, guid: be5e5d42647b27a49bf2979746088a82, type: 3}
       propertyPath: m_Name
-      value: PersistantGameOnjects
+      value: PersistantGameObjects
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -318,4 +318,4 @@ SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 518540457}
-  - {fileID: 535104283}
+  - {fileID: 1132332366}

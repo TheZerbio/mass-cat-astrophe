@@ -6,7 +6,7 @@ namespace Assets.Scripts
     using UnityEngine;
 
     [RequireComponent(typeof(MainAudioManager))]
-    public class CatSoundPlayer : MonoBehaviour
+    public class CatSoundManager : MonoBehaviour
     {
         [SerializeField] private string folder = "Sounds/Meows"; // path inside Assets/Resources/
         [SerializeField] private bool avoidRepeat = true;
@@ -37,6 +37,9 @@ namespace Assets.Scripts
                 Debug.LogWarning($"Purr Clip is missing");
             
             InitPurrSource();
+            
+            //Register
+            manager.CatSoundManager = this;
             
             //Testing:
             interaction = InputSystem.actions.FindAction("Interact");
