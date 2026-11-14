@@ -81,7 +81,7 @@ SpriteRenderer:
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 2
   m_MaskInteraction: 0
   m_Sprite: {fileID: -6288179971597629913, guid: 9836387bf02f54e66b6df44faa85d1f4, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -108,6 +108,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   isDestroyed: 0
   destroyedSprite: {fileID: -55592512191499825, guid: 123e0582cf331432c97f1e7d68f3edf1, type: 3}
+  destroyedSprite2: {fileID: -1085576058040644581, guid: 89e3486ad89c34619ae35690ed9337e8, type: 3}
   smokePrefab: {fileID: 0}
 --- !u!60 &8157589964936574362
 PolygonCollider2D:
