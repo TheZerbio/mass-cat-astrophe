@@ -1,0 +1,22 @@
+﻿using UnityEngine;
+
+[RequireComponent(typeof(MainAudioManager))]
+public class SfxAudioManager : MonoBehaviour
+{
+        private MainAudioManager manager;
+        private AudioSource source;
+        
+        [SerializeField] private AudioClip swooshSound;
+
+        void Start()
+        {
+                manager = GetComponent<MainAudioManager>();
+                source = GetComponent<AudioSource>();
+        }
+
+        [ContextMenu("PlaySwooch")]
+        void PlaySwoosh()
+        {
+                source.PlayOneShot(swooshSound);
+        }
+}
