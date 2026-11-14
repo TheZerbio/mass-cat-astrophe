@@ -11,7 +11,13 @@ public class SpriteMover : MonoBehaviour
     void Awake() => rb = GetComponent<Rigidbody2D>();
 
     // Called automatically by PlayerInput for an action named "Move"
-    void OnMove(InputValue value) => input = value.Get<Vector2>();
+    void OnMove(InputValue value)
+{
+    input = value.Get<Vector2>();
+    Debug.Log("OnMove: " + input);
+}
 
-    void FixedUpdate() => rb.linearVelocity = input * speed;
+    void FixedUpdate(){
+        rb.linearVelocity = input * speed;
+        }
 }

@@ -5,6 +5,7 @@ using UnityEngine.InputSystem.Controls;
 using UnityEngine.InputSystem.Layouts;
 using UnityEngine.InputSystem.LowLevel;
 using UnityEngine.InputSystem.Utilities;
+using UnityEngine.InputSystem.Users;
 public class FixedVectorInput : MonoBehaviour
 {
     VirtualMoveDevice device;
@@ -12,7 +13,11 @@ public class FixedVectorInput : MonoBehaviour
     void OnEnable()
     {
         device = InputSystem.AddDevice<VirtualMoveDevice>();
-         InputState.Change(device.move, new Vector2(1, 0));
+        Debug.Log("Virtual device added: " + device);
+        var playerInput = FindFirstObjectByType<PlayerInput>();
+            if (playerInput != null){
+                InputUser.PerformPairingWithDevice(device, playerInput.user);
+            }
     }
 
     void OnDisable()
@@ -23,6 +28,6 @@ public class FixedVectorInput : MonoBehaviour
     void Update()
     {
         // Any Vector2 you want
-        InputState.Change(device.move, new Vector2(1, 0));
+        InputState.Change(device.move, new Vector2(0, 0));
     }
 }
