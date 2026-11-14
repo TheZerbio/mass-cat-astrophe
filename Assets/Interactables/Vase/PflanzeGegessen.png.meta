@@ -1,16 +1,10 @@
 fileFormatVersion: 2
-guid: 1dcc1d495e63f424b890a80563e58888
+guid: a5a679db9002041d7a8bc50874647fc3
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 2275383279288507240
-    second: Shredded_Sofa_Overrun_with_Fluff-removebg-preview_0
-  - first:
-      213: -6460687018624651729
-    second: Shredded_Sofa_Overrun_with_Fluff-removebg-preview_1
-  - first:
-      213: -546196419191890619
-    second: Shredded_Sofa_Overrun_with_Fluff-removebg-preview_2
+      213: 3408727420808655620
+    second: PflanzeGegessen_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -121,13 +115,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: Shredded_Sofa_Overrun_with_Fluff-removebg-preview_0
+      name: PflanzeGegessen_0
       rect:
         serializedVersion: 2
-        x: 88
-        y: 40
-        width: 523
-        height: 282
+        x: 481
+        y: 52
+        width: 727
+        height: 1472
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -136,52 +130,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 86bdad97909c39f10800000000000000
-      internalID: 2275383279288507240
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Shredded_Sofa_Overrun_with_Fluff-removebg-preview_1
-      rect:
-        serializedVersion: 2
-        x: 611
-        y: 104
-        width: 10
-        height: 9
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: f2e66e103670756a0800000000000000
-      internalID: -6460687018624651729
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Shredded_Sofa_Overrun_with_Fluff-removebg-preview_2
-      rect:
-        serializedVersion: 2
-        x: 364
-        y: 36
-        width: 16
-        height: 22
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 54d1a7820458b68f0800000000000000
-      internalID: -546196419191890619
+      spriteID: 403fe6d678b3e4f20800000000000000
+      internalID: 3408727420808655620
       vertices: []
       indices: 
       edges: []
@@ -200,9 +150,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      Shredded_Sofa_Overrun_with_Fluff-removebg-preview_0: 2275383279288507240
-      Shredded_Sofa_Overrun_with_Fluff-removebg-preview_1: -6460687018624651729
-      Shredded_Sofa_Overrun_with_Fluff-removebg-preview_2: -546196419191890619
+      PflanzeGegessen_0: 3408727420808655620
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

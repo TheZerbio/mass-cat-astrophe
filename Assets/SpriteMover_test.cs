@@ -14,7 +14,7 @@ public class SpriteMover : MonoBehaviour
     void OnMove(InputValue value)
 {
     input = value.Get<Vector2>();
-    Debug.Log("OnMove: " + input);
+    //Debug.Log("OnMove: " + input);
 }
 
     void FixedUpdate(){
