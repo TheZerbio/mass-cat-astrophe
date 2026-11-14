@@ -4,6 +4,7 @@ using UnityEngine;
 [RequireComponent(typeof(MainAudioManager),typeof(NetworkManager))]
 public class GameManager : MonoBehaviour
 {
+        private static int _managerId = 0;
         //There will be exactly one instance of this Class that get initialized in the main menu/start scree -> Persists over all Scenes
         // How to access from other scripts
         // private GameManager gm = GameObject.Find("PersistantGameObjects").GetComponent<GameManager>();
@@ -11,6 +12,7 @@ public class GameManager : MonoBehaviour
         public double destructionScore = 0.0;
         public MainAudioManager Sounds;
         public NetworkManager Network;
+        private int ownId;
         
         [System.NonSerialized] public int? gameId = null;
         
@@ -21,6 +23,11 @@ public class GameManager : MonoBehaviour
          */
         void Awake()
         {
+                ownId = _managerId++;
+                if (ownId != 0)
+                {
+                        Destroy(gameObject);
+                }
                 Sounds=gameObject.GetComponent<MainAudioManager>();
                 Network=gameObject.GetComponent<NetworkManager>();
         }
