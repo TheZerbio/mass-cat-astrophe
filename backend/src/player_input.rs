@@ -1,13 +1,17 @@
-use axum::extract::{Path, WebSocketUpgrade};
+use axum::extract::{Path, Query, WebSocketUpgrade};
 use axum::extract::ws::{Message, WebSocket};
-use axum::response::Response;
+use axum::http::header;
+use axum::response::{IntoResponse, Response};
 use axum::Router;
 use axum::routing::get;
+use qrcode::QrCode;
+use qrcode::render::svg;
 use serde::Deserialize;
-use crate::{get_active_games, player_exists};
+use crate::{game_exists, get_active_games, player_exists};
 
 pub(crate) fn joystick_routing(router: Router) -> Router {
     router.route("/game/{game_id}/js_controlls/{player_id}/ws", get(joy_ws_upgrader))
+        .route("/qr.svg", get(qr_svg_from_str))
 }
 async fn joy_ws_upgrader(ws: WebSocketUpgrade, Path((game_id, player_id)): Path<(usize, usize)>)->Response{
      ws.on_upgrade(move |socket| joy_ws_handler(socket, game_id, player_id))
@@ -37,6 +41,7 @@ async fn joy_ws_handler(mut socket: WebSocket, game_id: usize, player_id: usize)
     }
 }
 fn on_player_input(PlayerInput{game_id, player_id, x, y}: PlayerInput){
+    if (!player_exists(game_id, player_id)){ return;}
     let mut games = get_active_games();
     let game = &mut games[game_id];
     if game.players[player_id].is_master && x+y > 0.01{
@@ -53,6 +58,7 @@ fn on_player_input(PlayerInput{game_id, player_id, x, y}: PlayerInput){
     let player = &mut game.players[player_id];
     player.similarities.push(similarity);
     player.score += similarity;
+    player.last_input = [x, y];
 }
 
 fn dot_prod_4values(x1: f64, x2:f64, y1: f64, y2:f64)->f64{
@@ -65,4 +71,11 @@ fn norm_inputs(mut input: PlayerInput)->PlayerInput {
         input.y /= distance;
     }
     input
+}
+#[derive(Deserialize)]
+struct QRQUERY{text:String}
+async fn qr_svg_from_str(Query(QRQUERY{text}): Query<QRQUERY>) -> impl IntoResponse {
+    let code = QrCode::new(text.as_bytes()).unwrap();
+    let image = code.render::<svg::Color>().min_dimensions(256, 256).build();
+    ([(header::CONTENT_TYPE, "image/svg+xml")], image)
 }

@@ -2,18 +2,195 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>CATastrophe<</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>CATastrophe</title>
+    <style>
+        :root {
+            --bg: #ffffff;
+            --card: #f5f5f5;
+            --text: #1a1a1a;
+            --muted: #666;
+            --border: #c8c8c8;
+            --error: #c62828;
+        }
+        html, body {
+            margin: 0;
+            min-height: 100%;
+            background: var(--bg);
+            color: var(--text);
+            font-family: system-ui, sans-serif;
+        }
+
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            min-height: 100dvh;            /* phones: ignore the browser's address bar */
+            padding: 16px;
+            box-sizing: border-box;
+        }
+
+        /* one card holding the form, the error text and the QR button (stacked vertically) */
+        .card {
+            width: 100%;
+            max-width: 360px;
+            background: var(--card);
+            border-radius: 16px;
+            padding: 28px 24px;
+            box-sizing: border-box;
+            border: 1px solid #e2e2e2;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        #register_name {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        h1 {
+            margin: 0 0 4px;
+            font-size: 28px;
+            text-align: center;
+        }
+
+        label {
+            font-size: 14px;
+            color: var(--muted);
+        }
+
+        #display_name {
+            font: inherit;
+            font-size: 18px;               /* >= 16px: iOS doesn't zoom in on focus */
+            padding: 12px 14px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            background: #ffffff;
+            color: var(--text);
+            outline: none;
+        }
+        #display_name:focus {
+            border-color: #a8a8a8;
+            box-shadow: 0 0 0 3px rgba(168, 168, 168, 0.35);
+        }
+
+       button {
+            font-size: 18px;
+            font-weight: 600;
+            padding: 12px;
+            border: 1px solid rgba(0, 0, 0, 0.25);
+            border-radius: 10px;
+            color: #1a1a1a;
+            background: linear-gradient(180deg, #ffffff 0%, #e0e0e0 35%, #a8a8a8 100%);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3), inset 0 1px 2px rgba(255, 255, 255, 0.7);
+            cursor: pointer;
+            min-height: 48px;              /* comfortable touch target */
+            -webkit-tap-highlight-color: transparent;
+        }
+        button:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3), inset 0 1px 2px rgba(255, 255, 255, 0.7);
+        }
+
+        /* secondary action: quieter than "Join Game" */
+        button.secondary {
+            font-size: 16px;
+            font-weight: 500;
+            background: #ffffff;
+            border: 2px solid var(--border);
+            box-shadow: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        button.secondary:active {
+            background: #ececec;
+            box-shadow: none;
+        }
+        button.secondary svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* QR code: full-screen overlay, hidden until .open is added */
+        #qrcode {
+            position: fixed;
+            inset: 0;
+            z-index: 10;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            padding: 16px;
+            box-sizing: border-box;
+            background: rgba(255, 255, 255, 0.97);
+            cursor: pointer;
+        }
+        #qrcode.open {
+            display: flex;
+        }
+        #qrcode img {
+            width: min(85vw, 65vh, 420px);
+            height: auto;
+            aspect-ratio: 1;
+            box-sizing: border-box;
+            background: #ffffff;           /* scanners need a light background around the code */
+            padding: 16px;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+            border: 1px solid #e2e2e2;
+        }
+        #qrcode::before {
+            content: "Scan to join this game";
+            font-size: 22px;
+            font-weight: 600;
+            text-align: center;
+        }
+        #qrcode::after {
+            content: "Tap anywhere to close";
+            font-size: 15px;
+            color: var(--muted);
+            text-align: center;
+        }
+
+        #error_text {
+            margin: 0;
+            min-height: 1.2em;             /* reserve space so the layout doesn't jump */
+            color: var(--error);
+            font-size: 14px;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
-    <form id="register_name">
-        <p>Display-name:</p>
-        <label for="display_name"></label><input type="text" name="display_name" id="display_name"/>
-        <button type="submit">Join Game</button>
-        <p id="error_text" onclick="submit()"></p>
-    </form>
+    <main class="card">
+        <form id="register_name">
+            <h1>CATastrophe</h1>
+            <label for="display_name">Display name</label>
+            <input type="text" name="display_name" id="display_name"
+                   autofocus required maxlength="20" autocomplete="off" enterkeyhint="go"/>
+            <button type="submit">Join Game</button>
+        </form>
+        <p id="error_text"></p>
+        <button type="button" id="show_qr" class="secondary">
+            <!-- small QR icon -->
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+                <rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4v-3"/>
+            </svg>
+            Invite others
+        </button>
+    </main>
+    <div id="qrcode" role="dialog" aria-label="QR code to join this game"></div>
     <script>
         function join_game(name){
-
+            name = encodeURI(name);
             const params = new URLSearchParams(window.location.search);
             let game_id = params.get('game_id');
 
@@ -29,6 +206,26 @@
             event.preventDefault();
             join_game(window.document.getElementById("display_name").value);
         });
+        // the autofocus attribute alone is ignored by some browsers -> focus explicitly
+        document.getElementById("display_name").focus();
+
+
+        // QR-code button
+        const qr_div = document.getElementById("qrcode");
+        const params = new URLSearchParams(location.search);
+        const join_url = `${location.origin}/game/play?game_id=${params.get("game_id")}`;
+
+        document.getElementById("show_qr").addEventListener("click", () => {
+            const img = document.createElement("img");
+            img.src = `/qr.svg?text=${encodeURIComponent(join_url)}`;
+            img.alt = "QR code to join this game";
+            qr_div.replaceChildren(img);   // replaces old content, so clicking twice doesn't add 2 codes
+            qr_div.classList.add("open");  // show the overlay
+        });
+        // close the overlay: tap anywhere on it, or Escape on a keyboard
+        qr_div.addEventListener("click", () => qr_div.classList.remove("open"));
+        document.addEventListener("keydown", e => { if (e.key === "Escape") qr_div.classList.remove("open"); });
+
     </script>
 </body>
 </html>

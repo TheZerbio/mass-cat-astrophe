@@ -1,4 +1,3 @@
-use std::fmt::format;
 use std::sync::{Arc, LazyLock, Mutex, MutexGuard};
 use axum::{routing::post, Json, Router};
 use axum::extract::{Path, Query};
@@ -7,13 +6,13 @@ use axum::response::Html;
 use axum::routing::get;
 use serde::{Deserialize, Serialize};
 use crate::game_communictaion::game_ui_routing;
-use crate::status::{status_css, status_page};
+use crate::status::{status_page};
 
 mod status;
 mod player_input;
 mod game_communictaion;
 
-const PORT: i64 = 8900;
+const PORT: i64 = 8901;
 
 #[derive(Serialize)]
 struct Player{
@@ -21,9 +20,16 @@ struct Player{
     name: String,
     is_master: bool,
     similarities: Vec<f64>,
+    last_input: [f64; 2]
+}
+
+enum GameState {
+    ACTIVE, STARTING, CREATED, DISCONNECTED,
+    RECONNECTING,
+    STOPPED, IDLE
 }
 struct Game {
-    is_active: bool,
+    state: GameState,
     id: usize,
     input_sum: [f64; 2],
     num_inputs: usize,
@@ -31,6 +37,14 @@ struct Game {
     // (to try to make it fair to the first one )
     players:  Vec<Player>,
     master_input: bool,
+}
+
+fn is_active(game: &Game)->bool{
+    match game.state {
+        GameState::STOPPED => false,
+        GameState::DISCONNECTED => false,
+        _ => true
+    }
 }
 
 static ACTIVE_GAMES: LazyLock<Mutex<Vec<Game>>> = LazyLock::new(|| Mutex::new(vec![]));
@@ -42,8 +56,12 @@ fn get_active_games() ->  MutexGuard<'static, Vec<Game>> {
 
 #[tokio::main]
 async fn main(){
+    let port: i64 = std::env::args()
+        .nth(1)                                   // args[0] is the program itself, [1] the first argument
+        .and_then(|p| p.parse().ok())
+        .unwrap_or(PORT);
     let router = routes();
-    let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{PORT}")).await.unwrap();
+    let listener = tokio::net::TcpListener::bind(format!("0.0.0.0:{port}")).await.unwrap();
     axum::serve(listener, router).await.unwrap();
 }
 fn routes() -> Router {
@@ -72,12 +90,12 @@ async fn create_new_game()-> Json<serde_json::Value> {
     let mut  ag = get_active_games();
     let mut free_slot = ag.len();
     for game in ag.iter_mut(){
-        if !game.is_active{
+        if !is_active(game) {
             free_slot = game.id as usize;
             break;
         }
     }
-    let new_game = Game {is_active: true, id: free_slot, input_sum: [0.0; 2], num_inputs: 0, last_avg_input: [0.; 2], players: vec![], master_input: false };
+    let new_game = Game { state: GameState::CREATED, id: free_slot, input_sum: [0.0; 2], num_inputs: 0, last_avg_input: [0.; 2], players: vec![], master_input: false };
     if free_slot >= ag.len() {ag.push(new_game);} else {ag[free_slot] = new_game;};
     return Json(serde_json::json!({"game_id": free_slot }));
 }
@@ -91,14 +109,17 @@ async fn register_player(Path((game_id, name)): Path<(usize, String)>)
     if ag[game_id].players.iter().any(|player| player.name == name){
         return  Err((StatusCode::CONFLICT,"player name already exists"));
     }
-    ag[game_id].players.push(Player{score: 0.0, name, is_master: false, similarities: vec![] });
+    ag[game_id].players.push(Player{score: 0.0, name, is_master: false, similarities: vec![], last_input: [0., 0.] });
     return Ok(Json(ag[game_id].players.len()-1));
 }
 
 async fn elevate_player(Path((game_id, name)): Path<(usize, String)>){
     if !game_exists(game_id) {return;}
     let mut ag = get_active_games();
-    ag[game_id].players.iter_mut().for_each(|mut player| {player.is_master = player.name == name;})
+    ag[game_id].players.iter_mut().for_each(
+        |player| {
+        player.is_master = if player.name == name {!player.is_master} else {false};
+        })
 }
 
 
@@ -111,12 +132,12 @@ async fn remove_player(Path((game_id, name)): Path<(usize, String)>){
 async fn close_game(Path(game_id): Path<usize>){
     if !game_exists(game_id){return;}
     let mut ag = get_active_games();
-    ag[game_id].is_active = false;
+    ag[game_id].state = GameState::STOPPED;
 }
 
 fn game_exists(game_id: usize)->bool{
     let ag = get_active_games();
-    return game_id < ag.len() && ag[game_id].is_active;
+    return game_id < ag.len() && is_active(&ag[game_id]);
 }
 fn player_exists(game_id:usize, player_id: usize )->bool{
     if (game_exists(game_id)) {

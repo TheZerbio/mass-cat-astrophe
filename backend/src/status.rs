@@ -1,7 +1,7 @@
 use axum::response::{Html, IntoResponse};
 use axum::http::header;
 
-use crate::get_active_games;
+use crate::{get_active_games, GameState, is_active};
 
 const PAGE: &str = include_str!("../static/status.html");
 const CSS: &str = include_str!("../static/status.css");
@@ -12,9 +12,9 @@ pub async fn status_page() -> Html<String> {
     let mut html = String::new();
 
     for game in games.iter() {
-        let class = if game.is_active { "game" } else { "game inactive" };
+        let class = if is_active(game) { "game" } else { "game inactive" };
         html += &format!("<div class=\"{class}\"><h2>Game {}</h2>", game.id);
-        if game.is_active {
+        if is_active(game) {
             html += &format!("<button class=\"close\" onclick=\"closeGame({})\">close game</button>", game.id);
         }
         // average of the inputs collected so far in this tick (none yet -> 0,0)
@@ -24,8 +24,8 @@ pub async fn status_page() -> Html<String> {
             [0.0, 0.0]
         };
         html += &format!(
-            "<table class=\"stats\">             <tr><td>active</td><td>{}</td></tr>             <tr><td>input_sum</td><td>[{:.2}, {:.2}]</td></tr>             <tr><td>num_inputs</td><td>{}</td></tr>             <tr><td>current avg</td><td>[{:.2}, {:.2}]</td></tr>             <tr><td>last_avg_input</td><td>[{:.2}, {:.2}]</td></tr>             </table>",
-            game.is_active,
+            "<table class=\"stats\">             <tr><td>state</td><td>{}</td></tr>             <tr><td>input_sum</td><td>[{:.2}, {:.2}]</td></tr>             <tr><td>num_inputs</td><td>{}</td></tr>             <tr><td>current avg</td><td>[{:.2}, {:.2}]</td></tr>             <tr><td>last_avg_input</td><td>[{:.2}, {:.2}]</td></tr>             </table>",
+            format_state(&game.state),
             game.input_sum[0], game.input_sum[1],
             game.num_inputs,
             avg[0], avg[1],
@@ -66,6 +66,18 @@ pub async fn status_page() -> Html<String> {
     }
 
     Html(PAGE.replace("{{GAMES}}", &html))
+}
+
+fn format_state(state: &GameState)-> String {
+    match state {
+        GameState::CREATED => "⚪".to_string(),
+        GameState::STARTING =>"🔵".to_string(),
+        GameState::ACTIVE => "🟢".to_string(),
+        GameState::IDLE => "🟤".to_string(),
+        GameState::RECONNECTING => "🟠".to_string(),
+        GameState::DISCONNECTED => "🔴".to_string(),
+        GameState::STOPPED => "🟥".to_string(),
+    }
 }
 
 // GET /status.css

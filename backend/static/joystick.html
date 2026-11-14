@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <!-- without this, phones render the page zoomed out at desktop width -->
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
     <title>CAT-astrophe</title>
     <style>
         html, body {
@@ -60,11 +60,89 @@
                 inset 0 3px 6px rgba(255, 255, 255, 0.6);  /* bright top rim */
 
         }
+
+        /* small round QR button in the top-right corner */
+        #show_qr {
+            position: fixed;
+            top: max(12px, env(safe-area-inset-top));     /* stay clear of the phone's notch */
+            right: max(12px, env(safe-area-inset-right));
+            z-index: 5;
+            width: 44px;                   /* still big enough to hit with a thumb */
+            height: 44px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            border: 1px solid rgba(128, 128, 128, 0.6);
+            background: rgba(255, 255, 255, 0.85);
+            color: #333;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+        #show_qr:active {
+            transform: scale(0.94);
+        }
+        #show_qr svg {
+            width: 22px;
+            height: 22px;
+        }
+
+        /* QR code: full-screen overlay, hidden until .open is added */
+        #qrcode {
+            position: fixed;
+            inset: 0;
+            z-index: 10;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            padding: 16px;
+            box-sizing: border-box;
+            background: rgba(255, 255, 255, 0.97);
+            cursor: pointer;
+        }
+        #qrcode.open {
+            display: flex;
+        }
+        #qrcode img {
+            width: min(85vw, 65vh, 420px);
+            height: auto;
+            aspect-ratio: 1;
+            box-sizing: border-box;
+            background: #ffffff;           /* scanners need a light background around the code */
+            padding: 16px;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+            border: 1px solid #e2e2e2;
+        }
+        #qrcode::before {
+            content: "Scan to join this game";
+            font-size: 22px;
+            font-weight: 600;
+            text-align: center;
+        }
+        #qrcode::after {
+            content: "Tap anywhere to close";
+            font-size: 15px;
+            color: #666;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
-    <h1>That's all we have game for today!</h1>
+    <h1>Cause some Maniac!</h1>
     <div id="joy_base"><div id="joy_knob"></div></div>
+    <button type="button" id="show_qr" aria-label="Show QR code to invite others">
+        <!-- small QR icon -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+            <rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4v-3"/>
+        </svg>
+    </button>
+    <div id="qrcode" role="dialog" aria-label="QR code to join this game"></div>
     <script>
         let url_params = new URLSearchParams(window.location.search);
         // general data
@@ -167,7 +245,25 @@
                 return document.visibilityState === "visible";
         }
         /// send in background loop
-        setInterval(()=> {if (is_active()) send_input()}, 1000 / 20 );
+        setInterval(()=> {if (is_active()) send_input()}, 1000 / 25 );
+
+
+
+        // QR-code button
+        const qr_div = document.getElementById("qrcode");
+        const params = new URLSearchParams(location.search);
+        const join_url = `${location.origin}/game/play?game_id=${params.get("game_id")}`;
+
+        document.getElementById("show_qr").addEventListener("click", () => {
+            const img = document.createElement("img");
+            img.src = `/qr.svg?text=${encodeURIComponent(join_url)}`;
+            img.alt = "QR code to join this game";
+            qr_div.replaceChildren(img);   // replaces old content, so clicking twice doesn't add 2 codes
+            qr_div.classList.add("open");  // show the overlay
+        });
+        // close the overlay: tap anywhere on it, or Escape on a keyboard
+        qr_div.addEventListener("click", () => qr_div.classList.remove("open"));
+        document.addEventListener("keydown", e => { if (e.key === "Escape") qr_div.classList.remove("open"); });
 
 
 
