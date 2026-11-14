@@ -14,7 +14,9 @@ public class VoteCard : MonoBehaviour
     [SerializeField] float deadzone = 0.5f;
     [SerializeField] float scaleSelected = 1.15f;
     [SerializeField] float voteDuration = 10f;    // length of the voting window
+    [SerializeField] InputActionReference moveAction;
 
+    InputAction move => moveAction.action;
     public UnityEvent<int> onVoted;               // passes the final index (0-2)
 
     int index = -1;         // -1 = nothing selected yet
@@ -22,14 +24,9 @@ public class VoteCard : MonoBehaviour
     float timeLeft;
     bool locked;
 
-    InputAction move;
 
-    void Awake()
-    {
-        move = new InputAction("Move", InputActionType.Value);
-        move.AddBinding("<Gamepad>/leftStick");
-        move.AddBinding("<Joystick>/stick");
-    }
+
+    
 
     void OnEnable()
     {
