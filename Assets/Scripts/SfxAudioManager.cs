@@ -16,7 +16,7 @@ public class SfxAudioManager : MonoBehaviour
         }
 
         [ContextMenu("PlaySwooch")]
-        void PlaySwoosh()
+        public void PlaySwoosh()
         {
                 source.PlayOneShot(swooshSound);
         }

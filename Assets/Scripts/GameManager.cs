@@ -4,7 +4,6 @@ using UnityEngine;
 [RequireComponent(typeof(MainAudioManager),typeof(NetworkManager))]
 public class GameManager : MonoBehaviour
 {
-        private static int _managerId = 0;
         //There will be exactly one instance of this Class that get initialized in the main menu/start scree -> Persists over all Scenes
         // How to access from other scripts
         // private GameManager gm = GameObject.Find("PersistantGameObjects").GetComponent<GameManager>();
@@ -21,15 +20,22 @@ public class GameManager : MonoBehaviour
          * Update() (every Frame)
          * FixedUpdate (Physics sim tick, use for collisions and Movement tyoe stuff)
          */
+        public static GameManager Instance { get; private set; }
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetStatics() => Instance = null;
+
         void Awake()
         {
-                ownId = _managerId++;
-                if (ownId != 0)
+                if (Instance != null && Instance != this)
                 {
                         Destroy(gameObject);
+                        return;               // stop here so the duplicate doesn't keep initialising
                 }
-                Sounds=gameObject.GetComponent<MainAudioManager>();
-                Network=gameObject.GetComponent<NetworkManager>();
+                Instance = this;
+                DontDestroyOnLoad(gameObject);
+                Sounds = GetComponent<MainAudioManager>();
+                Network = GetComponent<NetworkManager>();
         }
         void Start()
         {

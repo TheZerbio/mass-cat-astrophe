@@ -24,11 +24,13 @@ public class SettingsControler : MonoBehaviour
     public void SetCatVolume(float volume)
     {
         gameManager.Sounds.CatVolume = volume;
+        gameManager.Sounds.CatSoundManager.PlayMeow();
     }
     
     public void SetSfxVolume(float volume)
     {
         gameManager.Sounds.SfxVolume = volume;
+        gameManager.Sounds.SfxManager.PlaySwoosh();
     }
     
     public void SetMusicVolume(float volume)
