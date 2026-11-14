@@ -11,7 +11,7 @@ public class HttpRequestManager
         public ulong game_id;   // must match the JSON key exactly
     }
 
-    private const string BaseUrl = "https://cat-astrophe.pahlke.me";
+    private string BaseUrl = WebConfig.HttpsBaseURL;
     private readonly MonoBehaviour runner;   // runs the coroutines for this plain class
 
     public bool HasGameId { get; private set; }
@@ -26,6 +26,7 @@ public class HttpRequestManager
     }
 
     public void CreateGame() => runner.StartCoroutine(CreateGameRoutine());
+    public void StopGame() => runner.StartCoroutine(StopGameRoutine());
 
     private IEnumerator CreateGameRoutine()
     {
@@ -45,5 +46,26 @@ public class HttpRequestManager
         GameId = JsonUtility.FromJson<NewGameResponse>(request.downloadHandler.text).game_id;
         HasGameId = true;
         OnGameCreated?.Invoke(GameId);
+    }
+    
+    private IEnumerator StopGameRoutine()
+    {
+        if (HasGameId)
+        {
+            using var request = UnityWebRequest.Post($"{BaseUrl}/game/{GameId}/close", "{}", "application/json");
+            yield return request.SendWebRequest();
+
+            if (request.result != UnityWebRequest.Result.Success)
+            {
+                string msg = $"CreateGame failed: {request.responseCode} {request.error}\n{request.downloadHandler.text}";
+                Debug.LogError(msg);
+                OnError?.Invoke(msg);
+                yield break;
+            }
+
+            GameId = JsonUtility.FromJson<NewGameResponse>(request.downloadHandler.text).game_id;
+            HasGameId = true;
+            OnGameCreated?.Invoke(GameId);
+        }
     }
 }

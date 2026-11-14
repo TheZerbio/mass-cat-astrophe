@@ -11,8 +11,9 @@ public class NetworkManager : MonoBehaviour
     public bool GameReady { get; private set; }
     private bool _gameIdReady = false;
     private bool _startedWebsocket = false;
-    public bool disableWebsocket = true;
-    private readonly string _baseURL = "https://cat-astrophe.pahlke.me/";
+    private bool _startingWebsocket = false;
+    public bool disableWebsocket = false;
+    private readonly string _baseURL = WebConfig.WebsocketBaseURL;
     private GameManager _gameManager;
     
     
@@ -36,25 +37,28 @@ public class NetworkManager : MonoBehaviour
 
     async void Update()
     {
-        if (_httpRequestManager.HasGameId &&  !_gameIdReady)
+        if (!_gameIdReady && _httpRequestManager.HasGameId)
         {
             _gameManager.gameId = (int)_httpRequestManager.GameId;
             _gameIdReady = true;
         }
 
-        if (_gameIdReady)
+        if (!_startingWebsocket && _gameIdReady)
         {
-            InitWebsocket($"{_baseURL}/game/{_httpRequestManager.GameId}/ws/controls");
             Debug.Log("Game ID: " + _gameManager.gameId);
-            if (!disableWebsocket)
-                await _websocket.Connect();
+            var url = $"{_baseURL}/game/{_gameManager.gameId}/ws/controls";
+            Debug.Log("Connecting to: " + url);
+            InitWebsocket(url);
+            _startingWebsocket = true;
+            await _websocket.Connect();
         }
 
-        if (_gameIdReady && !_startedWebsocket)
+        if (!_startedWebsocket && _gameIdReady)
         {
             if (_websocket.State == WebSocketState.Open)
             {
                 _startedWebsocket = true;
+                SendWebSocketMessage("Hi From Unity :)");
                 GameReady = true;
             }
         }
@@ -66,6 +70,11 @@ public class NetworkManager : MonoBehaviour
         _websocket.OnOpen += () => Debug.Log("Connection open!");
         _websocket.OnError += (e) => Debug.Log("Error! " + e);
         _websocket.OnClose += (code) => Debug.Log("Connection closed!");
+        _websocket.OnMessage += (bytes) =>
+        {
+            var message = System.Text.Encoding.UTF8.GetString(bytes);
+            Debug.Log("Received: " + message);
+        };
     }
     
         
@@ -85,6 +94,8 @@ public class NetworkManager : MonoBehaviour
 
     private async void OnApplicationQuit()
     {
+        _httpRequestManager.StopGame();
         await _websocket.Close();
     }
+    
 }
