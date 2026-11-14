@@ -12,6 +12,7 @@ public class SfxAudioManager : MonoBehaviour
         {
                 manager = GetComponent<MainAudioManager>();
                 source = GetComponent<AudioSource>();
+                manager.SfxManager = this;
         }
 
         [ContextMenu("PlaySwooch")]

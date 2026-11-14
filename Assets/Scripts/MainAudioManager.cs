@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Assets.Scripts;
+using UnityEngine;
 
 public class MainAudioManager : MonoBehaviour
 {
@@ -7,6 +8,10 @@ public class MainAudioManager : MonoBehaviour
         public AudioSource CatPurrSource { get; private set; }
         
         public AudioSource SfxSource { get; private set; }
+
+        public SfxAudioManager SfxManager;
+        public CatSoundManager CatSoundManager;
+        public BackgroundAudioManager BackgroundAudioManager;
         
         [SerializeField] [Range(0,1)] private float musicVolume = 1.0f;
         public float MusicVolume
@@ -61,5 +66,11 @@ public class MainAudioManager : MonoBehaviour
         void OnValidate()                                    // Inspector slider in Play Mode
         {
                 if (Application.isPlaying) ApplyVolume();
+        }
+        
+        //Pass trough
+        void PlayMeowEffect()
+        {
+            
         }
 }
