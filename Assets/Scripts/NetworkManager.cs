@@ -114,5 +114,10 @@ public class NetworkManager : MonoBehaviour
         _httpRequestManager.StopGame();
         await _websocket.Close();
     }
+
+    public void StartGame()
+    {
+        _httpRequestManager.StartGame();
+    }
     
 }

@@ -1,13 +1,10 @@
 fileFormatVersion: 2
-guid: 3b3fc30c59e394152aa4deb189c7e82a
+guid: b21ea23f7ecd81e41a9188324c7484dc
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -4130238597609245333
-    second: cat_down_1_0
-  - first:
-      213: 3401209453684089255
-    second: cat_down_1_1
+      213: 9169877530624898698
+    second: Slider_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -102,6 +99,19 @@ TextureImporter:
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
   - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
     buildTarget: WebGL
     maxTextureSize: 2048
     resizeAlgorithm: 0
@@ -118,13 +128,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: cat_down_1_0
+      name: Slider_0
       rect:
         serializedVersion: 2
-        x: 148
-        y: 59
-        width: 330
-        height: 602
+        x: 64
+        y: 54
+        width: 1952
+        height: 322
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -133,30 +143,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: b65b4efd0e17ea6c0800000000000000
-      internalID: -4130238597609245333
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: cat_down_1_1
-      rect:
-        serializedVersion: 2
-        x: 313
-        y: 48
-        width: 28
-        height: 12
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 7a16a8d4af5833f20800000000000000
-      internalID: 3401209453684089255
+      spriteID: a86bbbea703f14f70800000000000000
+      internalID: 9169877530624898698
       vertices: []
       indices: 
       edges: []
@@ -175,8 +163,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      cat_down_1_0: -4130238597609245333
-      cat_down_1_1: 3401209453684089255
+      Slider_0: 9169877530624898698
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

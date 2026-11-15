@@ -11,6 +11,7 @@ public class GameManager : MonoBehaviour
         public double destructionScore = 0.0;
         public MainAudioManager Sounds;
         public NetworkManager Network;
+        private int ownId;
         
         [System.NonSerialized] public int? gameId = null;
         
@@ -19,10 +20,23 @@ public class GameManager : MonoBehaviour
          * Update() (every Frame)
          * FixedUpdate (Physics sim tick, use for collisions and Movement tyoe stuff)
          */
+        public static GameManager Instance { get; private set; }
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void ResetStatics() => Instance = null;
+
         void Awake()
         {
-                Sounds=gameObject.GetComponent<MainAudioManager>();
-                Network=gameObject.GetComponent<NetworkManager>();
+                if (Instance != null && Instance != this)
+                {
+                        gameObject.SetActive(false); // stop sibling components (input, network) right away
+                        Destroy(gameObject);
+                        return;              // stop here so the duplicate doesn't keep initialising
+                }
+                Instance = this;
+                DontDestroyOnLoad(gameObject);
+                Sounds = GetComponent<MainAudioManager>();
+                Network = GetComponent<NetworkManager>();
         }
         void Start()
         {

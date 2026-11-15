@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- without this, phones render the page zoomed out at desktop width -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+    <title>CAT-astrophe</title>
+    <style>
+        html, body {
+            margin: 0;
+            height: 100%;
+            font-family: system-ui, sans-serif;
+            overflow: hidden;              /* no scrolling while dragging */
+            user-select: none;             /* no text selection on long press */
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;   /* no iOS "copy/share" popup */
+            overscroll-behavior: none;     /* no pull-to-refresh */
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 24px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 22px;
+            text-align: center;
+        }
+
+        #joy_base {
+            position: relative;            /* knob is positioned relative to this */
+            width: min(80vw, 70vh);
+            aspect-ratio: 1;               /* always a square -> circle */
+            border-radius: 50%;
+            /* mid-grey with alpha: darkens light backgrounds, lightens dark ones */
+            background: radial-gradient(circle, rgba(128, 128, 128, 0.35) 0%, rgba(128, 128, 128, 0.2) 70%);
+            border: 4px solid rgba(128, 128, 128, 0.6);
+            touch-action: none;            /* browser must not scroll/zoom on touch */
+            max-width: 500px;
+        }
+
+        #joy_knob {
+            position: absolute;
+            left: 50%;                     /* JS changes left/top */
+            top: 50%;
+            width: 38%;
+            height: 38%;
+            border-radius: 50%;
+            transform: translate(-50%, -50%); /* left/top point to the knob's center */
+            /* silver: light spot top-left fading to darker grey = metallic dome */
+            background: radial-gradient(circle at 35% 30%, #ffffff 0%, #e0e0e0 20%, #a8a8a8 60%, #7a7a7a 100%);
+            border: 1px solid rgba(0, 0, 0, 0.25);
+            box-shadow:
+                0 6px 14px rgba(0, 0, 0, 0.45),            /* drop shadow below the knob */
+                inset 0 -4px 8px rgba(0, 0, 0, 0.25),      /* darker bottom edge */
+                inset 0 3px 6px rgba(255, 255, 255, 0.6);  /* bright top rim */
+
+        }
+
+        /* small round QR button in the top-right corner */
+        #show_qr {
+            position: fixed;
+            top: max(12px, env(safe-area-inset-top));     /* stay clear of the phone's notch */
+            right: max(12px, env(safe-area-inset-right));
+            z-index: 5;
+            width: 44px;                   /* still big enough to hit with a thumb */
+            height: 44px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            border: 1px solid rgba(128, 128, 128, 0.6);
+            background: rgba(255, 255, 255, 0.85);
+            color: #333;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+        }
+        #show_qr:active {
+            transform: scale(0.94);
+        }
+        #show_qr svg {
+            width: 22px;
+            height: 22px;
+        }
+
+        /* QR code: full-screen overlay, hidden until .open is added */
+        #qrcode {
+            position: fixed;
+            inset: 0;
+            z-index: 10;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            padding: 16px;
+            box-sizing: border-box;
+            background: rgba(255, 255, 255, 0.97);
+            cursor: pointer;
+        }
+        #qrcode.open {
+            display: flex;
+        }
+        #qrcode img {
+            width: min(85vw, 65vh, 420px);
+            height: auto;
+            aspect-ratio: 1;
+            box-sizing: border-box;
+            background: #ffffff;           /* scanners need a light background around the code */
+            padding: 16px;
+            border-radius: 16px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+            border: 1px solid #e2e2e2;
+        }
+        #qrcode::before {
+            content: "Scan to join this game";
+            font-size: 22px;
+            font-weight: 600;
+            text-align: center;
+        }
+        #qrcode::after {
+            content: "Tap anywhere to close";
+            font-size: 15px;
+            color: #666;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Cause some Maniac!</h1>
+    <div id="joy_base"><div id="joy_knob"></div></div>
+    <button type="button" id="show_qr" aria-label="Show QR code to invite others">
+        <!-- small QR icon -->
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/>
+            <rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4v-3"/>
+        </svg>
+    </button>
+    <div id="qrcode" role="dialog" aria-label="QR code to join this game"></div>
+    <script>
+        let url_params = new URLSearchParams(window.location.search);
+        // general data
+        let game_id = url_params.get('game_id');
+        let player_id = url_params.get('player_id');
+
+        let joy_pos = {x:0., y:0.}
+        let joy_elmt = document.getElementById('joy_knob');
+        let joy_base_elmt = document.getElementById('joy_base');
+
+
+        function get_center(element){
+            return {x:element.x+element.width/2, y:element.y+element.height/2};
+        }
+        function update_joy_pos(mouse_pos) {
+            const radius = joy_base_elmt.getBoundingClientRect().width / 2;
+            const joy_base_pos = joy_base_elmt.getBoundingClientRect();
+
+            joy_pos.x = (mouse_pos.x - get_center(joy_base_pos).x) / radius;
+            joy_pos.y = (mouse_pos.y - get_center(joy_base_pos).y) / radius;
+            // clamp to circle
+
+            set_knop_pos()
+
+        }
+        function set_knop_pos(){
+            const dist = Math.hypot(joy_pos.x, joy_pos.y);
+            if (dist > 1) {
+                joy_pos.x /= dist;
+                joy_pos.y /= dist;
+            }
+            joy_elmt.style.left = (50 + joy_pos.x * 50) + "%";
+            joy_elmt.style.top  = (50 + joy_pos.y * 50) + "%";
+        }
+
+        let is_dragging = false;
+        joy_elmt.addEventListener('pointerdown', (e) => {is_dragging = true;});
+        document.addEventListener('pointerup', (e) => {is_dragging = false;requestAnimationFrame(return_knot_to_center)});
+        document.addEventListener('pointercancel', (e)=>{is_dragging = false;requestAnimationFrame(return_knot_to_center)});
+        document.addEventListener('pointermove', (e) => {capture_joy_drag(e)});
+        function capture_joy_drag(event){
+            if (!is_dragging)  return;
+            let pointer_pos = {x: event.clientX, y: event.clientY};
+            update_joy_pos(pointer_pos);
+        }
+         function return_knot_to_center(){
+            if (is_dragging)  return;
+            const return_speed = 0.75
+            joy_pos.x *= return_speed;
+            joy_pos.y *= return_speed;
+             joy_elmt.style.left = (50 + joy_pos.x * 50) + "%";
+             joy_elmt.style.top  = (50 + joy_pos.y * 50) + "%";
+             if (Math.hypot(joy_pos.x, joy_pos.y) >= 0.01)
+                 requestAnimationFrame(return_knot_to_center)
+         }
+
+         let keys = new Set()
+         document.addEventListener('keypress', (e) => {keys.add(e.code); update_joy_keys();});
+        document.addEventListener("keyup",   e => { keys.delete(e.code); update_joy_keys();});
+            function update_joy_keys(){
+                //console.log(keys);
+                let x = 0, y = 0;
+                if (keys.has("KeyA")) x -= 1;
+                if (keys.has("KeyD")) x += 1;
+                if (keys.has("KeyW")) y -= 1;
+                if (keys.has("KeyS")) y += 1;
+                joy_pos = {x, y};
+
+                set_knop_pos();
+            }
+
+
+
+        /// websockets
+        let ws_connected = false;
+        let ws = null;
+        connect_ws();
+        function connect_ws(){
+            if (!ws_connected){
+                ws = new WebSocket(`/game/${game_id}/js_controlls/${player_id}/ws`);
+                ws_connected = true; // so in the meantime no new one is opened, send checks if it was successful
+            }
+            return ws;
+        }
+
+            ws.onopen = () => {
+                console.log("connected to game!");
+            }
+            ws.onclose = () => {
+                console.log("disconnected from game!");
+                ws_connected = false;
+            }
+
+        function send_input(){
+            connect_ws()
+            if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({x: joy_pos.x, y: -joy_pos.y}))
+        }
+
+        function is_active(){
+                return document.visibilityState === "visible";
+        }
+        /// send in background loop
+        setInterval(()=> {if (is_active()) send_input()}, 1000 / 25 );
+
+
+
+        // QR-code button
+        const qr_div = document.getElementById("qrcode");
+        const params = new URLSearchParams(location.search);
+        const join_url = `${location.origin}/game/play?game_id=${params.get("game_id")}`;
+
+        document.getElementById("show_qr").addEventListener("click", () => {
+            const img = document.createElement("img");
+            img.src = `/qr.svg?text=${encodeURIComponent(join_url)}`;
+            img.alt = "QR code to join this game";
+            qr_div.replaceChildren(img);   // replaces old content, so clicking twice doesn't add 2 codes
+            qr_div.classList.add("open");  // show the overlay
+        });
+        // close the overlay: tap anywhere on it, or Escape on a keyboard
+        qr_div.addEventListener("click", () => qr_div.classList.remove("open"));
+        document.addEventListener("keydown", e => { if (e.key === "Escape") qr_div.classList.remove("open"); });
+
+
+
+    </script>
+</body>
+</html>

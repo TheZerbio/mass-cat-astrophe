@@ -1,13 +1,10 @@
 fileFormatVersion: 2
-guid: 92249a955c441458d99ee53510245185
+guid: a8cf57543316741b88f3440082d9fb77
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 1679711965665065774
-    second: cat_down_stand_0
-  - first:
-      213: -3284009556716129598
-    second: cat_down_stand_1
+      213: -6161248252133393621
+    second: cat_up_2_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -114,17 +111,30 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Android
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: cat_down_stand_0
+      name: cat_up_2_0
       rect:
         serializedVersion: 2
         x: 148
-        y: 59
+        y: 171
         width: 330
-        height: 602
+        height: 561
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -133,30 +143,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: e2b707e12298f4710800000000000000
-      internalID: 1679711965665065774
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: cat_down_stand_1
-      rect:
-        serializedVersion: 2
-        x: 313
-        y: 48
-        width: 28
-        height: 12
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 2c272f425badc62d0800000000000000
-      internalID: -3284009556716129598
+      spriteID: b2bb79ebb59de7aa0800000000000000
+      internalID: -6161248252133393621
       vertices: []
       indices: 
       edges: []
@@ -175,8 +163,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      cat_down_stand_0: 1679711965665065774
-      cat_down_stand_1: -3284009556716129598
+      cat_up_2_0: -6161248252133393621
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
