@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -13,6 +14,7 @@ public class HttpRequestManager
 
     private string BaseUrl = WebConfig.HttpsBaseURL;
     private readonly MonoBehaviour runner;   // runs the coroutines for this plain class
+    private List<ScoreboardUI.PlayerScore> ScoresBuffer = new List<ScoreboardUI.PlayerScore>();
 
     public bool HasGameId { get; private set; }
     public ulong GameId { get; private set; }
@@ -28,6 +30,11 @@ public class HttpRequestManager
     public void CreateGame() => runner.StartCoroutine(CreateGameRoutine());
     public void StopGame() => runner.StartCoroutine(StopGameRoutine());
     public void StartGame() => runner.StartCoroutine(StartGameRoutine());
+    public List<ScoreboardUI.PlayerScore> GetPlayerScores()
+    {
+        runner.StartCoroutine(GetScoresRoutine());
+        return ScoresBuffer;
+    }
 
     private IEnumerator CreateGameRoutine()
     {
@@ -79,6 +86,29 @@ public class HttpRequestManager
                 Debug.LogError(msg);
                 OnError?.Invoke(msg);
                 yield break;
+            }
+        }
+    }
+    
+    private IEnumerator GetScoresRoutine()
+    {
+        if (HasGameId)
+        {
+            using var request = UnityWebRequest.Get($"{BaseUrl}/game/{GameId}/statistics");
+            yield return request.SendWebRequest();
+
+            if (request.result != UnityWebRequest.Result.Success)
+            {
+                string msg = $"StartGame failed: {request.responseCode} {request.error}\n{request.downloadHandler.text}";
+                Debug.LogError(msg);
+                OnError?.Invoke(msg);
+                yield break;
+            }
+
+            if (request.result == UnityWebRequest.Result.Success)
+            {
+                Debug.Log(request.downloadHandler.text);
+                ScoresBuffer = JsonUtility.FromJson<List<ScoreboardUI.PlayerScore>>(request.downloadHandler.text);
             }
         }
     }
