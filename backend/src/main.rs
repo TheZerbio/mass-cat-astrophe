@@ -47,6 +47,7 @@ struct Game {
     // (to try to make it fair to the first one )
     players:  Vec<Player>,
     master_input: bool,
+    active_handler_id: u64
 }
 
 fn is_active(game: &Game)->bool{
@@ -70,7 +71,7 @@ static ACTIVE_GAMES: LazyLock<Mutex<Vec<Game>>> = LazyLock::new(|| Mutex::new(ve
 
 #[inline]
 fn get_active_games() ->  MutexGuard<'static, Vec<Game>> {
-    ACTIVE_GAMES.lock().expect("failed to get active games")
+    ACTIVE_GAMES.lock().unwrap_or_else(|poisoned| poisoned.into_inner())
 }
 fn with_player<R>(game_id:usize, player_id:usize, f: impl FnOnce(&mut Player)->R)->Option<R>{
     let mut active_games = get_active_games();
@@ -125,7 +126,18 @@ async fn create_new_game()-> Json<serde_json::Value> {
             break;
         }
     }
-    let new_game = Game { state: GameState::CREATED, id: free_slot, input_sum: [0.0; 2], num_inputs: 0, last_avg_input: [0.; 2], players: vec![], master_input: false };
+    let increment_handler_from_last_game_slot =
+        ag.get(free_slot).map_or(0, |old_game| old_game.active_handler_id + 1);
+    let new_game = Game {
+        state: GameState::CREATED,
+        id: free_slot,
+        input_sum: [0.0; 2],
+        num_inputs: 0,
+        last_avg_input: [0.; 2],
+        players: vec![],
+        master_input: false,
+        active_handler_id: increment_handler_from_last_game_slot as u64,
+    };
     if free_slot >= ag.len() {ag.push(new_game);} else {ag[free_slot] = new_game;};
     return Json(serde_json::json!({"game_id": free_slot }));
 }

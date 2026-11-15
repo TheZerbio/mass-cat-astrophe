@@ -76,15 +76,18 @@ fn on_player_input(PlayerInput{game_id, player_id, x, y}: PlayerInput){
     }
 
     // calculate player deviation
-    let similarity: f64 = dot_prod_4values(game.last_avg_input[0], game.last_avg_input[1], x, y);
+    let similarity: f64 = distance_similarity(game.last_avg_input, [x, y]);
     let player = &mut game.players[player_id];
     player.similarities.push(similarity);
     player.score += similarity;
 
 }
 
-fn dot_prod_4values(x1: f64, x2:f64, y1: f64, y2:f64)->f64{
-    return (x1 *y1) +(x2 *y2);
+/// 1 = same stick position, 0 = opposite edges of the circle.
+/// Both inputs are inside the unit circle, so their distance is at most 2.
+fn distance_similarity(a: [f64; 2], b: [f64; 2]) -> f64 {
+    let distance = (a[0] - b[0]).hypot(a[1] - b[1]);
+    (1.0 - distance / 2.0).clamp(0.0, 1.0)
 }
 fn norm_inputs(mut input: PlayerInput)->PlayerInput {
     let distance = (input.x * input.x + input.y * input.y).sqrt();
