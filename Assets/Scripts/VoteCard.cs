@@ -17,12 +17,12 @@ public class VoteCard : MonoBehaviour
     [SerializeField] float scaleSelected = 1.15f;
     [SerializeField] float voteDuration = 10f;    // length of the voting window
     [SerializeField] InputActionReference moveAction;
+    [SerializeField] RectTransform optionsContainer;
 
     InputAction move => moveAction.action;
     public UnityEvent<int> onVoted;               // passes the final index (0-2)
 
     int index = -1;         // -1 = nothing selected yet
-    bool hasInput;          // has the stick left the center at any point?
     float timeLeft;
     bool locked;
     bool enabledByMe;
@@ -48,6 +48,7 @@ public class VoteCard : MonoBehaviour
         enabledByMe = !move.enabled;
         if (enabledByMe) move.Enable();
         StartVote();
+        RebuildLayout();
     }
 
     void OnDisable()
@@ -59,7 +60,6 @@ public class VoteCard : MonoBehaviour
     {
         timeLeft = voteDuration;
         locked = false;
-        hasInput = false;
         index = -1;
         Refresh(selectedColor);
         UpdateTimerUI();
@@ -69,12 +69,14 @@ public class VoteCard : MonoBehaviour
     {
         if (locked) return;
 
-        float x = move.ReadValue<Vector2>().x;
+        Vector2 stick = move.ReadValue<Vector2>();
         int target = index;
 
-        if (x < -deadzone)      { target = 0; hasInput = true; }
-        else if (x > deadzone)  { target = 2; hasInput = true; }
-        else if (hasInput && Mathf.Abs(x) < deadzone * 0.5f) target = 1;
+        // Whichever direction is pushed furthest wins, so diagonals don't flicker
+        if (stick.y > deadzone && stick.y > Mathf.Abs(stick.x)) target = 1;   // up = middle
+        else if (stick.x < -deadzone) target = 0;                             // left
+        else if (stick.x > deadzone)  target = 2;                             // right
+        // otherwise (stick at rest or pulled down): keep the current selection
 
         if (target != index)
         {
@@ -90,10 +92,10 @@ public class VoteCard : MonoBehaviour
             timeLeft = 0f;
             locked = true;
 
-            if (!hasInput)
+            if (index < 0)
             {
-                index = Random.Range(0, options.Length);   // no vote: pick randomly
-                Debug.Log("No input, random pick.");
+                index = Random.Range(0, options.Length);   // no selection made: random pick
+                Debug.Log("No selection, random pick.");
             }
 
             Refresh(finalColor);
@@ -116,5 +118,12 @@ public class VoteCard : MonoBehaviour
             options[i].color = sel ? highlight : normalColor;
             options[i].transform.localScale = Vector3.one * (sel ? scaleSelected : 1f);
         }
+    }
+
+    void RebuildLayout()
+    {
+        if (!optionsContainer) return;
+        Canvas.ForceUpdateCanvases();
+        LayoutRebuilder.ForceRebuildLayoutImmediate(optionsContainer);
     }
 }
