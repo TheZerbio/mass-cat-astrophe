@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- without this, phones render the page zoomed out at desktop width -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+    <title>Leaderboard</title>
+    <style>
+
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<h1>Statistics</h1>
+<h2>Agreement: <span id="agreement_score"></span></h2>
+<canvas id="similarity_chart"></canvas>
+<h1>Leaderboard</h1>
+<div id="leaderboard"></div>
+<script>
+    const DATA_PER_SECOND = 25;
+    let url_params = new URLSearchParams(window.location.search);
+    // general data
+    let game_id = url_params.get('game_id');
+    let player_id = url_params.get('player_id');
+    function aggregate_player_similarities(player){
+
+    }
+
+    function plot_player_similarities(){
+        fetch(`/game/${game_id}/similarities/${player_id}`).then(res => {
+            let json = res.json();
+            let similarities = json['similarities_agg'];
+            new Chart(document.getElementById('similarity_chart'), {type: 'line',
+                data: {
+                    labels: player.similarities.map((_, i) => i),   // x-axis: input number
+                    datasets: [{ label: json.name, data: similarities }]
+                },
+                options: {
+                    scales: { y: { min: -1, max: 1 } },
+                    elements: { point: { radius: 0 } }    // no dots, thousands of points would be unreadable
+                }})
+        })
+    }
+    function create_leaderboard_entry(data) {
+
+    }
+</script>
+</body>

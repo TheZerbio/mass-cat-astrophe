@@ -24,7 +24,9 @@ struct Player{
     score: f64,
     name: String,
     is_master: bool,
+    #[serde(skip_serializing)]
     similarities: Vec<f64>,
+    similarities_agg: Vec<f64>,
     #[serde(skip_serializing)]
     token: u16, // used to detect stale sessions and kick players rather than a security measure
     status: PlayerStatus,
@@ -154,6 +156,7 @@ async fn register_player(Path((game_id, name)): Path<(usize, String)>)
                     token,
                     status: PlayerStatus::CREATED,
                     idle_time: 0,
+            similarities_agg: vec![]
         });
     return Ok(Json(PlayerCreatedDTO{
         name: name_copy,
