@@ -1,0 +1,36 @@
+{
+    "version": 1,
+    "name": "cheats",
+    "maps": [
+        {
+            "name": "Cheats",
+            "id": "330db7af-00b6-4ec7-8333-ea4f42c94c8b",
+            "actions": [
+                {
+                    "name": "ScoreCard",
+                    "type": "Button",
+                    "id": "b301c9ba-6d9a-4fe2-be2c-7a26379946ca",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false,
+                    "priority": 0
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "09c289d6-bb4a-4ae6-9386-1ab3371298a7",
+                    "path": "<Keyboard>/p",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ScoreCard",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}

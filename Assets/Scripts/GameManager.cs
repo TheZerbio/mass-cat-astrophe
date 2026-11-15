@@ -1,5 +1,7 @@
 ﻿using QRCoder;
 using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(MainAudioManager),typeof(NetworkManager))]
 public class GameManager : MonoBehaviour
@@ -9,9 +11,11 @@ public class GameManager : MonoBehaviour
         // private GameManager gm = GameObject.Find("PersistantGameObjects").GetComponent<GameManager>();
         // Check for availability/null condition afterwards, Test Scenes require the PersistantGameObjects prefab to be placed
         public double destructionScore = 0.0;
+        public InputActionAsset cheatActionAsset;
         public MainAudioManager Sounds;
         public NetworkManager Network;
-        private int ownId;
+        private int _ownId;
+        private InputAction _skipToScoresInput;
         
         [System.NonSerialized] public int? gameId = null;
         
@@ -37,7 +41,27 @@ public class GameManager : MonoBehaviour
                 DontDestroyOnLoad(gameObject);
                 Sounds = GetComponent<MainAudioManager>();
                 Network = GetComponent<NetworkManager>();
+                if (cheatActionAsset != null)
+                {
+                        cheatActionAsset.Enable();
+                        // look the action up in the cheat asset, not in InputSystem.actions (the cat's asset)
+                        _skipToScoresInput = cheatActionAsset.FindAction("Cheats/ScoreCard");
+                        if (_skipToScoresInput != null)
+                                _skipToScoresInput.performed += OnSkipToScores;
+                        else
+                                Debug.LogWarning("Cheat action 'Cheats/ScoreCard' not found");
+                }
         }
+
+        void OnDestroy()
+        {
+                if (_skipToScoresInput != null)
+                        _skipToScoresInput.performed -= OnSkipToScores;
+                if (Instance == this && cheatActionAsset != null)
+                        cheatActionAsset.Disable();
+        }
+
+        private void OnSkipToScores(InputAction.CallbackContext _) => SceneManager.LoadScene("ScoreCard");
         void Start()
         {
                 

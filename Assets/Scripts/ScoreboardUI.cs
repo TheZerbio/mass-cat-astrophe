@@ -21,6 +21,12 @@ public class ScoreboardUI : MonoBehaviour
     {
         public string Name;
         public double Score;
+        
+        public PlayerScore(string name, double score)
+        {
+            Name = name;
+            Score = score;
+        }
     }
 
     public void Show(IEnumerable<PlayerScore> players)

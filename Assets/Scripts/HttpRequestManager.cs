@@ -108,7 +108,13 @@ public class HttpRequestManager
             if (request.result == UnityWebRequest.Result.Success)
             {
                 Debug.Log(request.downloadHandler.text);
-                ScoresBuffer = JsonUtility.FromJson<List<ScoreboardUI.PlayerScore>>(request.downloadHandler.text);
+                ScoreBoardEntryData.HttpReturn record  = JsonUtility.FromJson<ScoreBoardEntryData.HttpReturn>(request.downloadHandler.text);
+                var formated = new List<ScoreboardUI.PlayerScore>();
+                foreach (var playerObject in record.players)
+                {
+                    formated.Add(new ScoreboardUI.PlayerScore(playerObject.name, playerObject.score));
+                }
+                ScoresBuffer = formated;
             }
         }
     }

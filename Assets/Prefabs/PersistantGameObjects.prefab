@@ -71,6 +71,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameManager
   destructionScore: 0
+  cheatActionAsset: {fileID: -944628639613478452, guid: 2daf6d725daf4124397f9887539b7c52, type: 3}
   Sounds: {fileID: 0}
   Network: {fileID: 0}
 --- !u!114 &1163110359434017881
@@ -86,6 +87,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Assets.Scripts.NetworkManager
   disableWebsocket: 0
+  enableWebsocketOutput: 1
 --- !u!114 &209735975406644541
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -151,3 +153,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b60871d4f364342a9a50558912a5b2fd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FixedVectorInput
+  movement: {x: 0, y: 0}
