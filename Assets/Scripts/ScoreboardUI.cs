@@ -23,6 +23,7 @@ public class ScoreboardUI : MonoBehaviour
         {
             if (this != null) Show(scores); // the scene may have been left in the meantime
         });
+        destructionScore.text = "Destruction Score: " + (int) _gameManager.destructionScore;
         
     }
     
@@ -57,8 +58,6 @@ public class ScoreboardUI : MonoBehaviour
         // force the layout to update now, then jump to the top
         LayoutRebuilder.ForceRebuildLayoutImmediate(content);
         scrollRect.verticalNormalizedPosition = 1f;
-
-        destructionScore.text = "Destruction Score: " + (int) _gameManager.destructionScore;
     }
 
     public void LoadMainMenu()

@@ -121,7 +121,15 @@ public class HttpRequestManager
             foreach (var playerObject in response.players)
             {
                 double score = 0;
-                formated.Add(new ScoreboardUI.PlayerScore(playerObject.name, playerObject.similarities_agg.Average()));
+                if (playerObject.similarities_agg != null)
+                {
+                    for (int i = 0; i < playerObject.similarities_agg.Length; i++)
+                    {
+                        score += playerObject.similarities_agg[i];
+                    }
+                    score /= playerObject.similarities_agg.Length;
+                }
+                formated.Add(new ScoreboardUI.PlayerScore(playerObject.name, score));
             }
         }
         else
