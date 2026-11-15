@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 6927011940047756645}
   - component: {fileID: 3125112647656330355}
   - component: {fileID: -8347098730850026642}
+  - component: {fileID: 164509597227246957}
   m_Layer: 0
   m_Name: knauel_0
   m_TagString: Untagged
@@ -115,7 +116,7 @@ MonoBehaviour:
   - label: Play ball
     icon: {fileID: 0}
     outcome: 0
-    resultSprite: {fileID: 0}
+    resultSprite: {fileID: 3752611680514812594, guid: 7f6cb5d4cfb774d83847a21c78b37fdd, type: 3}
     score: 0
     comment: Boring, why would you pick that?
   - label: Yarn seems yummy...
@@ -130,3 +131,40 @@ MonoBehaviour:
     resultSprite: {fileID: 3434924435899517463, guid: fffa7c7b8a2c84e898cda8149d8fa87c, type: 3}
     score: 25
     comment: Cat version of a sweater (= a mess)
+--- !u!70 &164509597227246957
+CapsuleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3108367756679096692}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: -1.5877149, y: -0.29769635}
+  m_Size: {x: 2.9559407, y: 2.9559407}
+  m_Direction: 0
