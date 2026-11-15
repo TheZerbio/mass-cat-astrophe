@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using NativeWebSocket;
 using UnityEngine.Serialization;
@@ -10,9 +11,12 @@ public class NetworkManager : MonoBehaviour
     private HttpRequestManager _httpRequestManager;
     public bool GameReady { get; private set; }
     private bool _gameIdReady = false;
-    private bool _startedWebsocket = false;
-    private bool _startingWebsocket = false;
+    private bool _quitting = false;
+    private int _reconnectAttempts = 0;
+    private float _nextConnectTime = 0f;
+    private const float MaxReconnectDelay = 10f;
     public bool disableWebsocket = false;
+    public bool enableWebsocketOutput = true;
     private readonly string _baseURL = WebConfig.WebsocketBaseURL;
     private GameManager _gameManager;
     private  FixedVectorInput _fixedVectorInput;
@@ -49,75 +53,124 @@ public class NetworkManager : MonoBehaviour
         Application.runInBackground = true; // Recommended for WebGL
     }
 
-    async void Update()
+    void Update()
     {
         if (!_gameIdReady && _httpRequestManager.HasGameId)
         {
             _gameManager.gameId = (int)_httpRequestManager.GameId;
             _gameIdReady = true;
-        }
-
-        if (!_startingWebsocket && _gameIdReady)
-        {
             Debug.Log("Game ID: " + _gameManager.gameId);
-            var url = $"{_baseURL}/game/{_gameManager.gameId}/ws/controls";
-            Debug.Log("Connecting to: " + url);
-            InitWebsocket(url);
-            _startingWebsocket = true;
-            await _websocket.Connect();
         }
 
-        if (!_startedWebsocket && _gameIdReady)
+        // (Re)connect whenever there is no socket and the backoff delay has passed
+        if (_gameIdReady && _websocket == null && !_quitting && !disableWebsocket
+            && Time.unscaledTime >= _nextConnectTime)
         {
-            if (_websocket.State == WebSocketState.Open)
-            {
-                _startedWebsocket = true;
-                SendWebSocketMessage("Hi From Unity :)");
-                GameReady = true;
-            }
+            ConnectWebsocket();
         }
     }
 
-    void InitWebsocket(string url)
+    void ConnectWebsocket()
     {
-        _websocket = new WebSocket(url);
-        _websocket.OnOpen += () => Debug.Log("Connection open!");
-        _websocket.OnError += (e) => Debug.Log("Error! " + e);
-        _websocket.OnClose += (code) => Debug.Log("Connection closed!");
-        _websocket.OnMessage += (bytes) =>
-        {
-            var message = System.Text.Encoding.UTF8.GetString(bytes);
-            Debug.Log("Received: " + message);
-            WSPayload payload = JsonUtility.FromJson<WSPayload>(message);
-            Debug.Log(payload.toString());
-            _fixedVectorInput.movement= new Vector2(payload.x,payload.y);
-        };
-    }
-    
-        
+        var url = $"{_baseURL}/game/{_gameManager.gameId}/ws/controls";
+        if (_reconnectAttempts == 0)
+            Debug.Log("Connecting to: " + url);
+        else
+            Debug.Log($"Reconnecting to: {url} (attempt {_reconnectAttempts})");
 
+        var ws = new WebSocket(url);
+        _websocket = ws;
+
+        // Every handler checks "ws == _websocket" so events from an old, replaced socket are ignored
+        ws.OnOpen += () =>
+        {
+            if (ws != _websocket) return;
+            Debug.Log("Connection open!");
+            _reconnectAttempts = 0;
+            GameReady = true;
+            SendWebSocketMessage("Hi From Unity :)");
+        };
+        ws.OnError += (e) =>
+        {
+            if (ws != _websocket) return;
+            Debug.LogError("WebSocket error: " + e);
+        };
+        ws.OnClose += (code) =>
+        {
+            if (ws != _websocket) return;
+            OnWebsocketClosed(code);
+        };
+        ws.OnMessage += (bytes) =>
+        {
+            if (ws != _websocket) return;
+            var message = System.Text.Encoding.UTF8.GetString(bytes);
+            WSPayload payload;
+            try
+            {
+                payload = JsonUtility.FromJson<WSPayload>(message);
+            }
+            catch (System.Exception)
+            {
+                Debug.LogWarning("Ignoring non-JSON websocket message: " + message);
+                return;
+            }
+            if (payload == null) return;
+            if (enableWebsocketOutput)
+                Debug.Log(payload.toString());
+            ActiveInputs = payload.num_inputs;
+            _fixedVectorInput.movement = new Vector2(payload.x, payload.y);
+        };
+
+        // Connect() only completes when the connection ends; errors are reported through OnError/OnClose
+        _ = ws.Connect();
+    }
+
+    void OnWebsocketClosed(WebSocketCloseCode code)
+    {
+        _websocket = null;
+        GameReady = false;
+        ActiveInputs = 0;
+        _fixedVectorInput.movement = Vector2.zero; // don't let the cat keep running on the last input
+
+        if (_quitting) return;
+
+        // 1s, 2s, 4s, 8s, then every 10s
+        float delay = Mathf.Min(MaxReconnectDelay, Mathf.Pow(2, _reconnectAttempts));
+        _reconnectAttempts++;
+        _nextConnectTime = Time.unscaledTime + delay;
+
+        // Abnormal (1006) = connection cut without a close frame (proxy timeout, server task died, network)
+        Debug.LogWarning($"Connection closed: {code} ({(int)code}). Reconnecting in {delay:0}s");
+    }
 
     async void SendWebSocketMessage(string message)
     {
-        if (_websocket.State == WebSocketState.Open)
+        if (_websocket != null && _websocket.State == WebSocketState.Open)
         {
             await _websocket.SendText(message);
         }
         else
         {
-            Debug.LogError("WebSocket is not open!");
+            Debug.LogError("Tried to send Message but WebSocket is not open!");
         }
     }
 
     private async void OnApplicationQuit()
     {
-        _httpRequestManager.StopGame();
-        await _websocket.Close();
+        _quitting = true;
+        _httpRequestManager?.StopGame();
+        if (_websocket != null)
+            await _websocket.Close();
     }
 
     public void StartGame()
     {
         _httpRequestManager.StartGame();
+    }
+
+    public List<ScoreboardUI.PlayerScore> GetPlayerScores()
+    {
+        return _httpRequestManager.GetPlayerScores();
     }
     
 }

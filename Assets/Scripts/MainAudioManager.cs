@@ -56,6 +56,8 @@ public class MainAudioManager : MonoBehaviour
         
         private void ApplyVolume()
         {
+                // OnValidate can run on objects whose Awake never ran (prefab asset, deactivated duplicate)
+                if (BackgroundSource == null) return;
                 BackgroundSource.volume = volume*musicVolume;
                 CatMeowEffectSource.volume = volume*catVolume;
                 CatPurrSource.volume = volume*catVolume;

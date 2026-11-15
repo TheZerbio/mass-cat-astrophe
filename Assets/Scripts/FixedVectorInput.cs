@@ -33,7 +33,7 @@ public class FixedVectorInput : MonoBehaviour
     void PairWithPlayer()
     {
         if (device == null) return;
-        var playerInput = FindFirstObjectByType<PlayerInput>();
+        var playerInput = FindAnyObjectByType<PlayerInput>();
         if (playerInput != null)
         {
             InputUser.PerformPairingWithDevice(device, playerInput.user);
