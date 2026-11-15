@@ -55,3 +55,59 @@ h1 { margin-top: 0; }
 .stats td:first-child { color: #999; }
 .stats td:last-child { font-variant-numeric: tabular-nums; }
 .pid { color: #888; font-variant-numeric: tabular-nums; }
+
+/* QR button on each game card */
+.game button.qr {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0 0 8px 12px;   /* top right bottom left */
+  padding: 0 6px;
+  line-height: 1.2;
+  border: 1px solid rgba(128, 128, 128, 0.6);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.85);
+  color: #333;
+}
+.game button.qr svg { width: 12px; height: 12px; }
+
+/* QR code: full-screen overlay, hidden until .open is added (same as joystick page) */
+#qrcode {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 16px;
+  box-sizing: border-box;
+  background: rgba(255, 255, 255, 0.97);
+  color: #1e1e2e;
+  cursor: pointer;
+}
+#qrcode.open { display: flex; }
+#qrcode img {
+  width: min(85vw, 65vh, 420px);
+  height: auto;
+  aspect-ratio: 1;
+  box-sizing: border-box;
+  background: #ffffff;
+  padding: 16px;
+  border-radius: 16px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  border: 1px solid #e2e2e2;
+}
+#qrcode::before {
+  content: "Scan to join this game";
+  font-size: 22px;
+  font-weight: 600;
+  text-align: center;
+}
+#qrcode::after {
+  content: "Tap anywhere to close";
+  font-size: 15px;
+  color: #666;
+  text-align: center;
+}

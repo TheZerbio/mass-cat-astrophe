@@ -1,24 +1,24 @@
+use std::fmt::format;
 use std::time::Duration;
 use axum::extract::{Path, WebSocketUpgrade};
-use axum::extract::ws::{Message, WebSocket};
+use axum::extract::ws::{CloseFrame, Message, WebSocket};
 use axum::response::Response;
 use axum::{Json, Router};
 use axum::routing::{get, post};
 use serde::{Serialize};
 
-use crate::{game_exists, get_active_games, GameState};
+use crate::{game_exists, get_active_games, GameState, with_game};
 use crate::GameState::{ACTIVE, IDLE, RECONNECTING, STARTING};
 
 const UPDATES_PER_SECOND: u64 = 25;
 const RETRYS_BEFORE_CLOSE: u64 = 30 * UPDATES_PER_SECOND;
+pub(crate) const PLAYER_AFK_TIMEOUT: u64 = 7 * UPDATES_PER_SECOND;
 
 pub(crate) fn game_ui_routing(router: Router) -> Router {
     router
         .route("/game/{game_id}/ws/controls", get(gui_ws_upgrader))
         .route("/game/{game_id}/statistics/{player_id}", get(get_player_statistics))
         .route("/game/{game_id}/start", post(start_game))
-
-
 }
 
 async fn gui_ws_upgrader(ws: WebSocketUpgrade, Path(game_id): Path<usize>)->Response{
@@ -32,21 +32,34 @@ struct JSONBody{
     num_inputs: usize,
 }
 async fn gui_ws_handler(mut socket: WebSocket, game_id: usize) {
-    if !game_exists(game_id){return;}
+    if !game_exists(game_id){
+        socket.send
+        (Message::Close((Some(CloseFrame{
+            code: 404, reason: "game not found".into()})))
+        ).await.unwrap();
+        return;
+    }
     let mut interval = tokio::time::interval(Duration::from_millis(1000/UPDATES_PER_SECOND));
-    let mut retries:usize = RETRYS_BEFORE_CLOSE as usize;
+    let mut retries:u64 = RETRYS_BEFORE_CLOSE ;
     loop {
-        if (!game_in_progress(game_id)) {continue}
         interval.tick().await;
+        if (!game_in_progress(game_id)) {continue}
+
         let dto = game_tick(game_id);
 
         if socket.send(Message::Text(serde_json::to_string(&dto).unwrap().into())).await.is_err(){
+            set_reconnecting(game_id);
             retries -= 1;
             if (retries > 0){continue;}
-            let mut ag = get_active_games();
-            let game = &mut ag[game_id];
-            game.state = GameState::DISCONNECTED;
-            break;
+            set_disconnected(game_id);
+            socket.send
+            (Message::Close((Some(CloseFrame{
+                code: 1000, reason: format!("Could not connect to client after {} tries", RETRYS_BEFORE_CLOSE).into()})))
+            ).await.unwrap();
+            return;
+        } else {
+            set_active(game_id);
+            retries = RETRYS_BEFORE_CLOSE;
         }
     }
 
@@ -64,7 +77,6 @@ fn game_tick(game_id: usize) -> JSONBody{
     let last_num_input = game.num_inputs;
     game.num_inputs = 0;
     game.master_input = false;
-    let meow = false;
     JSONBody{x: game.last_avg_input[0], y: game.last_avg_input[1], num_inputs: last_num_input }
 }
 
@@ -104,4 +116,13 @@ fn game_in_progress(game_id: usize)->bool{
     }
 }
 
-
+fn set_reconnecting(game_id: usize){
+    with_game(game_id, |game| {game.state =GameState::RECONNECTING}).unwrap();
+}
+fn set_active(game_id: usize){
+    with_game(game_id, |game| {game.state =GameState::ACTIVE}).unwrap();
+}
+fn set_disconnected(game_id: usize){
+    with_game(game_id, |game| {game.state =GameState::DISCONNECTED}).unwrap();
+}
+pub(crate) fn get_player_afk_timeout()->u64{PLAYER_AFK_TIMEOUT}

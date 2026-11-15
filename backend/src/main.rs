@@ -14,13 +14,21 @@ mod game_communictaion;
 
 const PORT: i64 = 8901;
 
+#[derive(Serialize, Deserialize)]
+enum PlayerStatus{
+    CREATED,
+    PLAYING, IDLE, AFK, DISCONNECTED
+}
 #[derive(Serialize)]
 struct Player{
     score: f64,
     name: String,
     is_master: bool,
     similarities: Vec<f64>,
-    last_input: [f64; 2]
+    #[serde(skip_serializing)]
+    token: u16, // used to detect stale sessions and kick players rather than a security measure
+    status: PlayerStatus,
+    idle_time: usize,
 }
 
 enum GameState {
@@ -46,6 +54,15 @@ fn is_active(game: &Game)->bool{
         _ => true
     }
 }
+fn generate_player_token()->u16{
+    let random_number = rand::random::<u16>();
+    random_number
+}
+fn validate_player_token(game_id: usize, player_id: usize, token: u16) ->bool{
+    with_player(game_id, player_id, |player|{
+        player.token == token
+    }).unwrap_or(false)
+}
 
 static ACTIVE_GAMES: LazyLock<Mutex<Vec<Game>>> = LazyLock::new(|| Mutex::new(vec![]));
 
@@ -53,7 +70,18 @@ static ACTIVE_GAMES: LazyLock<Mutex<Vec<Game>>> = LazyLock::new(|| Mutex::new(ve
 fn get_active_games() ->  MutexGuard<'static, Vec<Game>> {
     ACTIVE_GAMES.lock().expect("failed to get active games")
 }
+fn with_player<R>(game_id:usize, player_id:usize, f: impl FnOnce(&mut Player)->R)->Option<R>{
+    let mut active_games = get_active_games();
+    let game = active_games.get_mut(game_id)?;
+    let player = game.players.get_mut(player_id)?;
+    Some(f(player))
+}
 
+fn with_game<R>(game_id:usize, mut f: impl FnOnce(&mut Game)->R)->Option<R>{
+    let mut active_games = get_active_games();
+    let game = active_games.get_mut(game_id)?;
+    Some(f(game))
+}
 #[tokio::main]
 async fn main(){
     let port: i64 = std::env::args()
@@ -100,8 +128,14 @@ async fn create_new_game()-> Json<serde_json::Value> {
     return Json(serde_json::json!({"game_id": free_slot }));
 }
 
+#[derive(Serialize)]
+struct PlayerCreatedDTO{
+    name: String,
+    id: usize,
+    token: u16,
+}
 async fn register_player(Path((game_id, name)): Path<(usize, String)>)
-    -> Result<Json<usize>, (StatusCode, &'static str)>{
+    -> Result<Json<PlayerCreatedDTO>, (StatusCode, &'static str)>{
     if!game_exists(game_id) {
         return Err((StatusCode::GONE, "no active game with that id"))}
     
@@ -109,8 +143,23 @@ async fn register_player(Path((game_id, name)): Path<(usize, String)>)
     if ag[game_id].players.iter().any(|player| player.name == name){
         return  Err((StatusCode::CONFLICT,"player name already exists"));
     }
-    ag[game_id].players.push(Player{score: 0.0, name, is_master: false, similarities: vec![], last_input: [0., 0.] });
-    return Ok(Json(ag[game_id].players.len()-1));
+    let name_copy = name.clone();
+    let token = generate_player_token();
+    ag[game_id].players.push(
+        Player{
+                    score: 0.0,
+                    name,
+                    is_master: false,
+                    similarities: vec![],
+                    token,
+                    status: PlayerStatus::CREATED,
+                    idle_time: 0,
+        });
+    return Ok(Json(PlayerCreatedDTO{
+        name: name_copy,
+        id: ag[game_id].players.len()-1,
+        token,
+    }));
 }
 
 async fn elevate_player(Path((game_id, name)): Path<(usize, String)>){
@@ -119,14 +168,20 @@ async fn elevate_player(Path((game_id, name)): Path<(usize, String)>){
     ag[game_id].players.iter_mut().for_each(
         |player| {
         player.is_master = if player.name == name {!player.is_master} else {false};
+        println!("Player {} is changed master to {}", name, player.is_master);
         })
+
 }
 
 
 async fn remove_player(Path((game_id, name)): Path<(usize, String)>){
     if !game_exists(game_id) {return;}
     let mut ag = get_active_games();
-    ag[game_id].players.retain(|player| player.name != name);
+    ag[game_id].players.iter_mut().filter(|player| player.name == name).for_each(
+        | player| {player.token = 0;/* removing would change the indices, but removing
+        the token makes his session stale*/ player.status = PlayerStatus::DISCONNECTED;}
+    );
+    println!("kicked player {}", name);
 }
 
 async fn close_game(Path(game_id): Path<usize>){
@@ -153,6 +208,7 @@ fn player_exists(game_id:usize, player_id: usize )->bool{
 struct QueryParameters{
     game_id: Option<usize>,
     player_id: Option<usize>,
+    token: Option<u16>,
 }
 async fn serve_js_pages(Query(params):Query<QueryParameters>)->Html<String>{
     match params.game_id {
@@ -166,7 +222,8 @@ async fn serve_js_pages(Query(params):Query<QueryParameters>)->Html<String>{
                     Html(PAGE.to_string())
                 }
                 Some(player_id) => {
-                    if !player_exists(game_id, player_id) {
+                    if (params.token == None ||
+                        !validate_player_token(game_id, player_id, params.token.unwrap()) ){
                         return Html(format!(
                             "<h1>Invalid session: Game or player doesn't exist</h1>\
                         <script>window.location.href='/game/play?game_id={}'</script>",
