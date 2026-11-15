@@ -108,7 +108,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: '::'
   isDestroyed: 0
   destroyedSprite: {fileID: -55592512191499825, guid: 123e0582cf331432c97f1e7d68f3edf1, type: 3}
-  destroyedSprite2: {fileID: -1085576058040644581, guid: 89e3486ad89c34619ae35690ed9337e8, type: 3}
+  destroyedSprite2: {fileID: 3651365526380468890, guid: da77d3bb819bb4ef3a25b4e565eefe20, type: 3}
   smokePrefab: {fileID: 0}
 --- !u!60 &8157589964936574362
 PolygonCollider2D:
