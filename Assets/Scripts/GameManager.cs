@@ -94,4 +94,15 @@ public class GameManager : MonoBehaviour
                                         return size;
                                 });
         }
+        
+        public void RestartGame()
+        {
+                Network?.StopGame();
+                if (Instance != null)
+                {
+                        Destroy(Instance.gameObject);   
+                        Instance = null;                
+                }
+                SceneManager.LoadScene("MainMenu");
+        }
 }
