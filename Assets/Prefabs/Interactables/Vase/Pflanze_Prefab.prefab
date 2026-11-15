@@ -633,7 +633,7 @@ MonoBehaviour:
     outcome: 0
     resultSprite: {fileID: 3596285860649878770, guid: edd0a6554e8324ea1af9daeb590905aa, type: 3}
     score: 25
-    comment: Pot gets thrown over!
+    comment: Looks like you are a bit too chuncky
   - label: Tap the pot with paws
     icon: {fileID: 0}
     outcome: 1

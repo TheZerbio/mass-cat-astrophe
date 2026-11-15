@@ -9,6 +9,7 @@ public class ScoreboardUI : MonoBehaviour
     [SerializeField] private RectTransform content;          // Scroll View/Viewport/Content
     [SerializeField] private ScoreboardEntry entryPrefab;
     [SerializeField] private ScrollRect scrollRect;
+    [SerializeField] private TMPro.TextMeshProUGUI destructionScore;
 
     private readonly List<ScoreboardEntry> _entries = new();
     private GameManager _gameManager;
@@ -56,6 +57,8 @@ public class ScoreboardUI : MonoBehaviour
         // force the layout to update now, then jump to the top
         LayoutRebuilder.ForceRebuildLayoutImmediate(content);
         scrollRect.verticalNormalizedPosition = 1f;
+
+        destructionScore.text = "Destruction Score: " + (int) _gameManager.destructionScore;
     }
 
     public void LoadMainMenu()

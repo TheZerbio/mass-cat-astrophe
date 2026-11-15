@@ -36,4 +36,9 @@ public class QRCodeLoader : MonoBehaviour
     {
         SceneManager.LoadScene("Settings");
     }
+
+    public void Quit()
+    {
+        Application.Quit();
+    }
 }
