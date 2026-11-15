@@ -1,16 +1,12 @@
 # CATastrophe input backend
 
-Phones scan a QR code, get a joystick in the browser, and the game receives the combined input of all players.
+This Backend rust and html Project is handling the Phone input and managing the communication between the parties. 
+THe Goal of the backend is to provide a input method every one can join to by QR code 
 
 ```
 cargo run --release          # PORT=8080, TICK_HZ=30 by default
 ```
 
-| Env          | Default                   | Meaning                                         |
-|--------------|---------------------------|-------------------------------------------------|
-| `PORT`       | `8080`                    | Listen port (binds `0.0.0.0`)                   |
-| `TICK_HZ`    | `30`                      | How often inputs are combined/pushed to the game |
-| `PUBLIC_URL` | `http://<lan-ip>:<PORT>`  | Base URL put into the QR code                   |
 
 Phones must be on the same network. On Windows, allow the binary through the firewall on first start.
 

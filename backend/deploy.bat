@@ -35,8 +35,7 @@ pushd "%SCRIPT_DIR%"
 cargo build --release
 if errorlevel 1 (
     popd
-    echo error: build failed 1>&2
-    exit /b 1
+    echo error: build failed  restarting old build 1>&2
 )
 popd
 

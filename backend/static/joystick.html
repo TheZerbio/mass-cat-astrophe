@@ -148,6 +148,7 @@
         // general data
         let game_id = url_params.get('game_id');
         let player_id = url_params.get('player_id');
+        let token = url_params.get('token');
 
         let joy_pos = {x:0., y:0.}
         let joy_elmt = document.getElementById('joy_knob');
@@ -179,7 +180,12 @@
         }
 
         let is_dragging = false;
-        joy_elmt.addEventListener('pointerdown', (e) => {is_dragging = true;});
+        joy_elmt.addEventListener('pointerdown', (e) => {
+            is_dragging = true;
+            joy_elmt.setPointerCapture(e.pointerId);
+        });
+
+        document.addEventListener('contextmenu', (e) => e.preventDefault());
         document.addEventListener('pointerup', (e) => {is_dragging = false;requestAnimationFrame(return_knot_to_center)});
         document.addEventListener('pointercancel', (e)=>{is_dragging = false;requestAnimationFrame(return_knot_to_center)});
         document.addEventListener('pointermove', (e) => {capture_joy_drag(e)});
@@ -219,26 +225,39 @@
         /// websockets
         let ws_connected = false;
         let ws = null;
+        let is_healthy = true;
         connect_ws();
         function connect_ws(){
-            if (!ws_connected){
-                ws = new WebSocket(`/game/${game_id}/js_controlls/${player_id}/ws`);
+            if (!ws_connected && is_healthy){
+                ws = new WebSocket(`/game/${game_id}/js_controls/${player_id}/${token}/ws`);
                 ws_connected = true; // so in the meantime no new one is opened, send checks if it was successful
             }
-            return ws;
+
         }
 
             ws.onopen = () => {
                 console.log("connected to game!");
             }
-            ws.onclose = () => {
-                console.log("disconnected from game!");
-                ws_connected = false;
-            }
+            ws.onclose = () => ws_disconnect();
+
+            ws.onerror = (e) => ws_disconnect();
+        function ws_disconnect() {
+            console.log("disconnected from game!");
+            fetch(`/player/check_integrity/${game_id}/${player_id}/${token}`).then(r => {
+                if (r.status === 200) {
+                    is_healthy = true;
+                } else {
+                    is_healthy = false;
+                    window.location.href = `/game/play?game_id=${game_id}`;
+                }
+            })
+            ws_connected = false;
+        }
+
 
         function send_input(){
             connect_ws()
-            if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({x: joy_pos.x, y: -joy_pos.y}))
+            if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({x: joy_pos.x, y: -joy_pos.y, token: Number(token)}));
         }
 
         function is_active(){
