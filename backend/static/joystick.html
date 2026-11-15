@@ -133,7 +133,7 @@
     </style>
 </head>
 <body>
-    <h1>Cause some Maniac!</h1>
+    <h1>Cause some Mania!</h1>
     <div id="joy_base"><div id="joy_knob"></div></div>
     <button type="button" id="show_qr" aria-label="Show QR code to invite others">
         <!-- small QR icon -->
@@ -231,17 +231,16 @@
             if (!ws_connected && is_healthy){
                 ws = new WebSocket(`/game/${game_id}/js_controls/${player_id}/${token}/ws`);
                 ws_connected = true; // so in the meantime no new one is opened, send checks if it was successful
+                // the handlers have to be set on every new socket, otherwise only the first one can reconnect
+                ws.onopen = () => console.log("connected to game!");
+                ws.onclose = () => ws_disconnect(socket);
+                ws.onerror = () => ws_disconnect(socket);
             }
 
         }
 
-            ws.onopen = () => {
-                console.log("connected to game!");
-            }
-            ws.onclose = () => ws_disconnect();
-
-            ws.onerror = (e) => ws_disconnect();
-        function ws_disconnect() {
+        function ws_disconnect(socket) {
+            if (socket !== ws || !ws_connected) return; // old socket, or already handled (error + close both fire)
             console.log("disconnected from game!");
             fetch(`/player/check_integrity/${game_id}/${player_id}/${token}`).then(r => {
                 if (r.status === 200) {
