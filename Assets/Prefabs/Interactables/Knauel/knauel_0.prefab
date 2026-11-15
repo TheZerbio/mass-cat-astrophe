@@ -109,3 +109,21 @@ MonoBehaviour:
   destroyedSprite: {fileID: 3434924435899517463, guid: fffa7c7b8a2c84e898cda8149d8fa87c, type: 3}
   destroyedSprite2: {fileID: -1747429003584336536, guid: b6650372da4c14281abf1095c2a93faa, type: 3}
   smokePrefab: {fileID: 0}
+  resultDelay: 1.5
+  debugLogs: 1
+  choices:
+  - label: Play ball
+    icon: {fileID: 0}
+    outcome: 0
+    resultSprite: {fileID: 0}
+    score: 67
+  - label: Yarn seems yummy...
+    icon: {fileID: 0}
+    outcome: 0
+    resultSprite: {fileID: -1747429003584336536, guid: b6650372da4c14281abf1095c2a93faa, type: 3}
+    score: 30
+  - label: Let's try to knit a sweater!
+    icon: {fileID: 0}
+    outcome: 0
+    resultSprite: {fileID: 3434924435899517463, guid: fffa7c7b8a2c84e898cda8149d8fa87c, type: 3}
+    score: 0

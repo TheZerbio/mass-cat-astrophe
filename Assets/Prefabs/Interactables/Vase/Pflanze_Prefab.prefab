@@ -625,6 +625,24 @@ MonoBehaviour:
   destroyedSprite: {fileID: 3408727420808655620, guid: a5a679db9002041d7a8bc50874647fc3, type: 3}
   destroyedSprite2: {fileID: 3596285860649878770, guid: edd0a6554e8324ea1af9daeb590905aa, type: 3}
   smokePrefab: {fileID: 0}
+  resultDelay: 1.5
+  debugLogs: 1
+  choices:
+  - label: Sit in the pot
+    icon: {fileID: 0}
+    outcome: 0
+    resultSprite: {fileID: 3596285860649878770, guid: edd0a6554e8324ea1af9daeb590905aa, type: 3}
+    score: 67
+  - label: Tap the pot with paws
+    icon: {fileID: 0}
+    outcome: 1
+    resultSprite: {fileID: 1861538009206935555, guid: 3a88436951b3f416cbd120f54a8c9767, type: 3}
+    score: 30
+  - label: Leaves seem yummy...
+    icon: {fileID: 0}
+    outcome: 0
+    resultSprite: {fileID: 3408727420808655620, guid: a5a679db9002041d7a8bc50874647fc3, type: 3}
+    score: 0
 --- !u!70 &-4220445049640364872
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
