@@ -397,6 +397,27 @@ MonoBehaviour:
   destroyedSprite: {fileID: 6611702968127351447, guid: 60f9dc940c61342ff97d9ceb3dbd7ea1, type: 3}
   destroyedSprite2: {fileID: -5653970812943767827, guid: 8f9bab7f4d7b546e386509521ef30216, type: 3}
   smokePrefab: {fileID: 0}
+  resultDelay: 1.5
+  debugLogs: 1
+  choices:
+  - label: Climb that thang!
+    icon: {fileID: 0}
+    outcome: 0
+    resultSprite: {fileID: -5653970812943767827, guid: 8f9bab7f4d7b546e386509521ef30216, type: 3}
+    score: 25
+    comment: Lampshade falls down
+  - label: Jump that thang!
+    icon: {fileID: 0}
+    outcome: 1
+    resultSprite: {fileID: 7202785322945237657, guid: 1fe341c6e0d484fdca7781b41466b7bd, type: 3}
+    score: 0
+    comment: Good call but no effects
+  - label: Leave it
+    icon: {fileID: 0}
+    outcome: 0
+    resultSprite: {fileID: 6611702968127351447, guid: 60f9dc940c61342ff97d9ceb3dbd7ea1, type: 3}
+    score: 50
+    comment: Light turns on. BEWARE THE POWER BILL!!
 --- !u!70 &8289775432792215792
 CapsuleCollider2D:
   m_ObjectHideFlags: 0

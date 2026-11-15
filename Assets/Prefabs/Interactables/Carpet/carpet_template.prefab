@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 8781145549294696970}
   - component: {fileID: -4098222808061017609}
   - component: {fileID: 5834007015904778137}
+  - component: {fileID: 8186191262511973078}
   m_Layer: 0
   m_Name: carpet_template
   m_TagString: Untagged
@@ -110,6 +111,27 @@ MonoBehaviour:
   destroyedSprite: {fileID: 4937001358346708172, guid: 4dc24fb0e50094b7a8367ff5e5118a26, type: 3}
   destroyedSprite2: {fileID: 3351953204126008612, guid: 412854cfad352400682df3555f83e96c, type: 3}
   smokePrefab: {fileID: 6862112562276844157, guid: 37d8293c76d0b4bce9a0ef2dc7b31481, type: 3}
+  resultDelay: 1.5
+  debugLogs: 1
+  choices:
+  - label: Roll over the carpet
+    icon: {fileID: 0}
+    outcome: 1
+    resultSprite: {fileID: 0}
+    score: 0
+    comment: Nothing happens...
+  - label: Something is coming up...
+    icon: {fileID: 0}
+    outcome: 0
+    resultSprite: {fileID: 3351953204126008612, guid: 412854cfad352400682df3555f83e96c, type: 3}
+    score: 50
+    comment: Whuuaaaa!
+  - label: Discover the downside of carpet!
+    icon: {fileID: 0}
+    outcome: 0
+    resultSprite: {fileID: 4937001358346708172, guid: 4dc24fb0e50094b7a8367ff5e5118a26, type: 3}
+    score: 25
+    comment: New tripping hazard unlocked!
 --- !u!60 &5834007015904778137
 PolygonCollider2D:
   m_ObjectHideFlags: 0
@@ -117,7 +139,7 @@ PolygonCollider2D:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8091200994573582650}
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 3
   m_Density: 1
   m_Material: {fileID: 0}
@@ -582,3 +604,40 @@ PolygonCollider2D:
       - {x: 7.7098117, y: 5.5540605}
       - {x: 7.699463, y: 5.5644093}
   m_UseDelaunayMesh: 1
+--- !u!70 &8186191262511973078
+CapsuleCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8091200994573582650}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_CompositeOperation: 0
+  m_CompositeOrder: 0
+  m_Offset: {x: -0.2686894, y: 0.19192219}
+  m_Size: {x: 7.9367437, y: 8.397341}
+  m_Direction: 0
