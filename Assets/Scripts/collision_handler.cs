@@ -1,59 +1,132 @@
+using System.Collections;
 using UnityEngine;
 
 public class Destroyable : MonoBehaviour
 {
     public bool isDestroyed = false;
-    public Sprite destroyedSprite;   // assign in the Inspector
+    public Sprite destroyedSprite;
     public Sprite destroyedSprite2;
     public GameObject smokePrefab;
 
+    [Header("Voting")]
+    [SerializeField] float resultDelay = 1.5f;
+
     private SpriteRenderer sr;
     private GameManager gm;
+    private bool voting;
+
+    // Shared by every Destroyable, so the card is only searched for once
+    static VoteCard cachedCard;
+
+    // The player's movement script (found when the player touches us)
+    private Behaviour frozenMovement;
+    private Rigidbody2D frozenBody;
 
     void Awake()
     {
-        gm = GameObject.Find("PersistantGameObjects").GetComponent<GameManager>();
-            if(gm == null){
-                Debug.Log("NO audio manager");
-            }
+        GameObject persistent = GameObject.Find("PersistantGameObjects");
+        if (persistent != null) gm = persistent.GetComponent<GameManager>();
+        if (gm == null) Debug.Log("NO game manager");
+
         sr = GetComponent<SpriteRenderer>();
     }
 
-    // Use this instead if the collider is NOT a trigger
-    void OnCollisionEnter2D(Collision2D collision)
+    VoteCard GetCard()
     {
-        if (collision.gameObject.CompareTag("Player") && !isDestroyed)
-        {
-            Destroy_();
-            //Destroy(GetComponent<PolygonCollider2D>());
-            //gameObject.AddComponent<PolygonCollider2D>();
-        }
-    }
-    
-    void OnTriggerEnter2D(Collider2D other)
-    {
-        if (other.CompareTag("Player") && !isDestroyed)
-        {
-            Destroy_();
-            
-        }
+        if (cachedCard == null)   // also covers a destroyed card after a scene reload
+            cachedCard = FindFirstObjectByType<VoteCard>(FindObjectsInactive.Include);
+        return cachedCard;
     }
 
-    //Change this to handle votes!
-    void Destroy_(bool alternate_destruction = true)
+void OnCollisionEnter2D(Collision2D collision)
+{
+    if (collision.gameObject.CompareTag("Player"))
+        StartVote(collision.collider);
+}
+
+void OnTriggerEnter2D(Collider2D other)
+{
+    if (other.CompareTag("Player"))
+        StartVote(other);
+}
+
+void StartVote(Collider2D playerCol)
+{
+    VoteCard card = GetCard();
+    if (isDestroyed || voting || card == null) return;
+    voting = true;
+
+    FreezePlayer(playerCol);
+
+    card.onVoted.RemoveListener(OnVoted);
+    card.onVoted.AddListener(OnVoted);
+    card.gameObject.SetActive(true);
+}
+
+RigidbodyConstraints2D savedConstraints;
+
+void FreezePlayer(Collider2D playerCol)
+{
+    // attachedRigidbody finds the rigidbody even if the collider is on a child
+    frozenBody = playerCol.attachedRigidbody;
+    Transform root = frozenBody ? frozenBody.transform : playerCol.transform.root;
+
+    if (frozenBody)
     {
-        isDestroyed = true;
-        if(alternate_destruction && destroyedSprite2 != null){
-            sr.sprite = destroyedSprite2;
-        } else {
-            sr.sprite = destroyedSprite;
+        frozenBody.linearVelocity = Vector2.zero;
+        frozenBody.angularVelocity = 0f;
+        savedConstraints = frozenBody.constraints;
+        frozenBody.constraints = RigidbodyConstraints2D.FreezeAll;  // works whatever the movement script is
+    }
+
+    // Replace PlayerController with your movement script's name
+    frozenMovement = root.GetComponentInChildren<SpriteMover>();
+    if (frozenMovement) frozenMovement.enabled = false;
+}
+
+void UnfreezePlayer()
+{
+    if (frozenBody) frozenBody.constraints = savedConstraints;
+    if (frozenMovement) frozenMovement.enabled = true;
+    frozenMovement = null;
+    frozenBody = null;
+}
+
+    void OnVoted(int choice)
+    {
+        GetCard().onVoted.RemoveListener(OnVoted);
+        StartCoroutine(FinishVote(choice));
+    }
+
+    IEnumerator FinishVote(int choice)
+    {
+        yield return new WaitForSeconds(resultDelay);
+
+        GetCard().gameObject.SetActive(false);
+        UnfreezePlayer();
+        voting = false;
+
+        Destroy_(choice);
+    }
+
+    // choice: 0 = left, 1 = middle, 2 = right
+    void Destroy_(int choice)
+    {
+        switch (choice)
+        {
+            case 0: sr.sprite = destroyedSprite;  break;
+            case 1: sr.sprite = destroyedSprite2; break;
+            case 2: return;   // spared
         }
+
+        isDestroyed = true;
         gm.destructionScore += 67;
         gm.Sounds.CatSoundManager.PlayMeow();
+
         if (smokePrefab != null)
         {
             GameObject smoke = Instantiate(smokePrefab, transform.position, Quaternion.identity);
-            Destroy(smoke, 3f);   // clean up after it finishes
+            Destroy(smoke, 3f);
         }
     }
 }
