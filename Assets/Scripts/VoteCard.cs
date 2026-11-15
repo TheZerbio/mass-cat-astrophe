@@ -6,6 +6,8 @@ using UnityEngine.InputSystem;
 public class VoteCard : MonoBehaviour
 {
     [SerializeField] Image[] options = new Image[3];
+    [SerializeField] TMPro.TMP_Text[] labels = new TMPro.TMP_Text[3];   // the Label under each option
+    [SerializeField] Image[] icons = new Image[3];                       // optional icon Images
     [SerializeField] Image timerBar;              // optional: Image with Type = Filled
     [SerializeField] TMPro.TMP_Text timerText;    // optional: shows seconds remaining
     [SerializeField] Color normalColor = Color.white;
@@ -23,18 +25,35 @@ public class VoteCard : MonoBehaviour
     bool hasInput;          // has the stick left the center at any point?
     float timeLeft;
     bool locked;
+    bool enabledByMe;
 
+    public void SetOptions(string[] newLabels, Sprite[] newIcons = null)
+    {
+        for (int i = 0; i < options.Length; i++)
+        {
+            if (labels != null && i < labels.Length && labels[i] && i < newLabels.Length)
+                labels[i].text = newLabels[i];
 
-
-    
+            if (icons != null && i < icons.Length && icons[i])
+            {
+                bool has = newIcons != null && i < newIcons.Length && newIcons[i] != null;
+                icons[i].gameObject.SetActive(has);
+                if (has) icons[i].sprite = newIcons[i];
+            }
+        }
+    }
 
     void OnEnable()
     {
-        move.Enable();
+        enabledByMe = !move.enabled;
+        if (enabledByMe) move.Enable();
         StartVote();
     }
 
-    void OnDisable() => move.Disable();
+    void OnDisable()
+    {
+        if (enabledByMe) move.Disable();
+    }
 
     public void StartVote()
     {
