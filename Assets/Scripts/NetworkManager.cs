@@ -168,9 +168,14 @@ public class NetworkManager : MonoBehaviour
         _httpRequestManager.StartGame();
     }
 
-    public List<ScoreboardUI.PlayerScore> GetPlayerScores()
+    /// <summary>Loads the scores from the server; onLoaded is called once they have arrived.</summary>
+    public void GetPlayerScores(System.Action<List<ScoreboardUI.PlayerScore>> onLoaded)
     {
-        return _httpRequestManager.GetPlayerScores();
+        _httpRequestManager.GetPlayerScores(onLoaded);
     }
     
+    public void StopGame()
+    {
+        _httpRequestManager.StopGame();
+    }
 }

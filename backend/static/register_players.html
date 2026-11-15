@@ -196,8 +196,12 @@
 
             let result = fetch(`/game/${game_id}/join/${name}`, {method: 'POST'})
                 .then(async response => {
-                    if (response.status === 200)
-                        window.location.href = `/game/play?game_id=${game_id}&player_id=${await response.json()}`;
+                    if (response.status === 200) {
+                        let json = await response.json();
+                        let player_id = json['id'];
+                        let token = json['token'];
+                        window.location.href = `/game/play?game_id=${game_id}&player_id=${player_id}&token=${token}`;
+                    }
                     else
                         window.document.getElementById("error_text").textContent = await response.text();
                 });

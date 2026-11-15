@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class ScoreboardUI : MonoBehaviour
@@ -15,12 +16,25 @@ public class ScoreboardUI : MonoBehaviour
     void Start()
     {
         _gameManager = GameObject.Find("PersistantGameObjects").GetComponent<GameManager>();
+        _gameManager.Network.StopGame();
+        // the scores arrive a moment later, so the list is filled in the callback
+        _gameManager.Network.GetPlayerScores(scores =>
+        {
+            if (this != null) Show(scores); // the scene may have been left in the meantime
+        });
+        
     }
     
     public struct PlayerScore
     {
         public string Name;
         public double Score;
+        
+        public PlayerScore(string name, double score)
+        {
+            Name = name;
+            Score = score;
+        }
     }
 
     public void Show(IEnumerable<PlayerScore> players)
@@ -42,5 +56,10 @@ public class ScoreboardUI : MonoBehaviour
         // force the layout to update now, then jump to the top
         LayoutRebuilder.ForceRebuildLayoutImmediate(content);
         scrollRect.verticalNormalizedPosition = 1f;
+    }
+
+    public void LoadMainMenu()
+    {
+        _gameManager.RestartGame();
     }
 }

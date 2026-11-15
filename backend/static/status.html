@@ -3,7 +3,6 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="refresh" content="2">
   <title>Game Status</title>
   <link rel="stylesheet" href="/status.css">
 </head>
@@ -14,7 +13,24 @@
   <div class="games">
     {{GAMES}}
   </div>
+  <div id="qrcode" role="dialog" aria-label="QR code to join this game"></div>
   <script>
+    // auto refresh every 2s (replaces the old meta refresh), but not while the QR modal is open
+    const qr_div = document.getElementById("qrcode");
+    setInterval(() => { if (!qr_div.classList.contains("open")) location.reload(); }, 2000);
+
+    // QR modal, same as on the joystick page
+    function showQr(gameId) {
+      const join_url = `${location.origin}/game/play?game_id=${gameId}`;
+      const img = document.createElement("img");
+      img.src = `/qr.svg?text=${encodeURIComponent(join_url)}`;
+      img.alt = "QR code to join this game";
+      qr_div.replaceChildren(img);
+      qr_div.classList.add("open");
+    }
+    qr_div.addEventListener("click", () => qr_div.classList.remove("open"));
+    document.addEventListener("keydown", e => { if (e.key === "Escape") qr_div.classList.remove("open"); });
+
     // TEMP: remove later
     async function newGame() {
       await fetch("/game/new", { method: "POST" });
