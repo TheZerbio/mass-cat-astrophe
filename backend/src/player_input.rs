@@ -1,13 +1,14 @@
 use axum::extract::{Path, Query, WebSocketUpgrade};
 use axum::extract::ws::{Message, WebSocket};
 use axum::http::{header, StatusCode};
-use axum::response::{IntoResponse, Response};
+use axum::response::{Html, IntoResponse, Response};
 use axum::{Json, Router};
 use axum::routing::get;
 use qrcode::QrCode;
 use qrcode::render::svg;
 use serde::Deserialize;
-use crate::{get_active_games, player_exists, validate_player_token, PlayerStatus};
+use std::time::Instant;
+use crate::{get_active_games, is_active, validate_player_token, PlayerStatus};
 use crate::game_communictaion::get_player_afk_timeout;
 use crate::PlayerStatus::{AFK, PLAYING};
 
@@ -15,6 +16,7 @@ pub(crate) fn joystick_routing(router: Router) -> Router {
     router.route("/game/{game_id}/js_controls/{player_id}/{token}/ws", get(joy_ws_upgrader))
         .route("/qr.svg", get(qr_svg_from_str))
         .route("/player/check_integrity/{game_id}/{player_id}/{token}", get(check_player_integrity))
+        .route("/stats", get(serve_leaderboard))
 }
 async fn joy_ws_upgrader(ws: WebSocketUpgrade, Path((game_id, player_id, token)): Path<(usize, usize, u16)>)->Response{
      ws.on_upgrade(move |socket| joy_ws_handler(socket, game_id, player_id, token))
@@ -49,34 +51,33 @@ async fn joy_ws_handler(mut socket: WebSocket, game_id: usize, player_id: usize,
     }
 }
 fn on_player_input(PlayerInput{game_id, player_id, x, y}: PlayerInput){
-    if (!player_exists(game_id, player_id)){ return;}
     let mut games = get_active_games();
-    let game = &mut games[game_id];
-    if game.players[player_id].is_master {
-        if x.hypot(y) > 0.01{
-        game.input_sum = [x, y];
-        game.master_input = true;
-        game.num_inputs = 1;}
-    } else if (!game.master_input){
-        let player = &mut game.players[player_id];
-            if (x.hypot(y) <= 0.01){
-                player.status = PlayerStatus::IDLE;
-                player.idle_time += 1;
-                if player.idle_time > get_player_afk_timeout() as usize {
-                    player.status = AFK;
-                    return;
-                }
-            }else {
-                player.status = PLAYING;
-                player.idle_time = 0;
+    // no indexing here: a panic while holding the lock would hit every game
+    let Some(game) = games.get_mut(game_id) else { return };
+    if !is_active(game) { return; }
+    let last_avg_input = game.last_avg_input;
+    let Some(player) = game.players.get_mut(player_id) else { return };
+
+    // only remember the latest input here; game_tick combines all players once per tick
+    player.last_input = [x, y];
+    player.last_input_at = Some(Instant::now());
+
+    if !player.is_master {
+        if x.hypot(y) <= 0.01 {
+            player.status = PlayerStatus::IDLE;
+            player.idle_time += 1;
+            if player.idle_time > get_player_afk_timeout() as usize {
+                player.status = AFK;
+                return;
             }
-            game.input_sum = [game.input_sum[0] + x, game.input_sum[1] + y];
-            game.num_inputs+=1;
+        } else {
+            player.status = PLAYING;
+            player.idle_time = 0;
+        }
     }
 
     // calculate player deviation
-    let similarity: f64 = dot_prod_4values(game.last_avg_input[0], game.last_avg_input[1], x, y);
-    let player = &mut game.players[player_id];
+    let similarity: f64 = dot_prod_4values(last_avg_input[0], last_avg_input[1], x, y);
     player.similarities.push(similarity);
     player.score += similarity;
 
@@ -104,4 +105,15 @@ async fn qr_svg_from_str(Query(QRQUERY{text}): Query<QRQUERY>) -> impl IntoRespo
 async fn check_player_integrity(Path((game_id, player_id, token)): Path<(usize, usize, u16)>)
     ->StatusCode{
     if validate_player_token(game_id, player_id, token){StatusCode::OK} else {StatusCode::NOT_FOUND}
+}
+
+#[derive(Deserialize)]
+struct PlayerDTO{
+    game_id: usize,
+    player_id: usize,
+    token: u16,
+}
+async fn serve_leaderboard(Query(PlayerDTO{game_id, player_id, token}): Query<PlayerDTO>)->Html<String>{
+    const PAGE: &str = include_str!("../static/leaderboard.html");
+    return Html(PAGE.to_string());
 }

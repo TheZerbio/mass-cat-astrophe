@@ -80,7 +80,7 @@ fn format_game_state(state: &GameState) -> String {
         GameState::CREATED => "⚪".to_string(),
         GameState::STARTING =>"🔵".to_string(),
         GameState::ACTIVE => "🟢".to_string(),
-        GameState::IDLE => "🟤".to_string(),
+        GameState::IDLE => "💤".to_string(),
         GameState::RECONNECTING => "🟠".to_string(),
         GameState::DISCONNECTED => "🔴".to_string(),
         GameState::STOPPED => "🟥".to_string(),

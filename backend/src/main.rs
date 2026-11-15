@@ -24,11 +24,17 @@ struct Player{
     score: f64,
     name: String,
     is_master: bool,
+    #[serde(skip_serializing)]
     similarities: Vec<f64>,
+    similarities_agg: Vec<f64>,
     #[serde(skip_serializing)]
     token: u16, // used to detect stale sessions and kick players rather than a security measure
     status: PlayerStatus,
     idle_time: usize,
+    #[serde(skip_serializing)]
+    last_input: [f64; 2], // latest joystick position, combined over all players every tick
+    #[serde(skip_serializing)]
+    last_input_at: Option<std::time::Instant>,
 }
 
 enum GameState {
@@ -45,6 +51,8 @@ struct Game {
     // (to try to make it fair to the first one )
     players:  Vec<Player>,
     master_input: bool,
+    started: bool, // /start was called; a reconnecting display continues instead of waiting again
+    connection_gen: u64, // counts display connections, only the newest one may drive the game
 }
 
 fn is_active(game: &Game)->bool{
@@ -68,7 +76,8 @@ static ACTIVE_GAMES: LazyLock<Mutex<Vec<Game>>> = LazyLock::new(|| Mutex::new(ve
 
 #[inline]
 fn get_active_games() ->  MutexGuard<'static, Vec<Game>> {
-    ACTIVE_GAMES.lock().expect("failed to get active games")
+    // a panic while the lock was held must not take every other game down with it
+    ACTIVE_GAMES.lock().unwrap_or_else(|poisoned| poisoned.into_inner())
 }
 fn with_player<R>(game_id:usize, player_id:usize, f: impl FnOnce(&mut Player)->R)->Option<R>{
     let mut active_games = get_active_games();
@@ -123,7 +132,9 @@ async fn create_new_game()-> Json<serde_json::Value> {
             break;
         }
     }
-    let new_game = Game { state: GameState::CREATED, id: free_slot, input_sum: [0.0; 2], num_inputs: 0, last_avg_input: [0.; 2], players: vec![], master_input: false };
+    // keep counting in a reused slot, so a leftover connection of the old game can't drive the new one
+    let connection_gen = ag.get(free_slot).map_or(0, |old_game| old_game.connection_gen + 1);
+    let new_game = Game { state: GameState::CREATED, id: free_slot, input_sum: [0.0; 2], num_inputs: 0, last_avg_input: [0.; 2], players: vec![], master_input: false, started: false, connection_gen };
     if free_slot >= ag.len() {ag.push(new_game);} else {ag[free_slot] = new_game;};
     return Json(serde_json::json!({"game_id": free_slot }));
 }
@@ -154,6 +165,9 @@ async fn register_player(Path((game_id, name)): Path<(usize, String)>)
                     token,
                     status: PlayerStatus::CREATED,
                     idle_time: 0,
+            similarities_agg: vec![],
+            last_input: [0.0; 2],
+            last_input_at: None,
         });
     return Ok(Json(PlayerCreatedDTO{
         name: name_copy,
