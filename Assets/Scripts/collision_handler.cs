@@ -161,7 +161,10 @@ public class Destroyable : MonoBehaviour
         if (choices == null || choice < 0 || choice >= choices.Length || choices[choice] == null) return;
         VoteChoice c = choices[choice];
 
-        if (c.outcome == Outcome.Spare) return;   // spared; set isDestroyed = true here if it should be final
+        if (c.outcome == Outcome.Spare){
+            isDestroyed = true;
+            return;   // spared; set isDestroyed = true here if it should be final
+            }
 
         // Use the choice's sprite, else fall back to the legacy ones
         Sprite result = c.resultSprite;
