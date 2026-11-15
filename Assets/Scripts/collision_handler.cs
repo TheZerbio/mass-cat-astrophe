@@ -13,6 +13,7 @@ public class Destroyable : MonoBehaviour
         public Outcome outcome = Outcome.Destroy;
         public Sprite resultSprite;          // sprite to swap to if Destroy
         public int score = 67;
+        [TextArea] public string comment;
     }
 
     public bool isDestroyed = false;
@@ -144,16 +145,19 @@ public class Destroyable : MonoBehaviour
     }
 
     IEnumerator FinishVote(int choice)
-    {
-        yield return new WaitForSeconds(resultDelay);
+{
+    yield return new WaitForSeconds(resultDelay);
 
-        VoteCard card = GetCard();
-        if (card) card.gameObject.SetActive(false);
-        UnfreezePlayer();
-        voting = false;
+    VoteCard card = GetCard();
+    if (card) card.gameObject.SetActive(false);
+    UnfreezePlayer();
+    voting = false;
 
-        Destroy_(choice);
-    }
+    if (choices != null && choice >= 0 && choice < choices.Length && choices[choice] != null)
+        CommentPopup.Show(choices[choice].comment);
+
+    Destroy_(choice);
+}
 
     // choice: 0 = left, 1 = middle, 2 = right
     void Destroy_(int choice)

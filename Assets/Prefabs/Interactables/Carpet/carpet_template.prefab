@@ -119,16 +119,19 @@ MonoBehaviour:
     outcome: 1
     resultSprite: {fileID: 0}
     score: 0
+    comment: Nothing happens...
   - label: Something is coming up...
     icon: {fileID: 0}
     outcome: 0
     resultSprite: {fileID: 3351953204126008612, guid: 412854cfad352400682df3555f83e96c, type: 3}
     score: 50
+    comment: Whuuaaaa!
   - label: Discover the downside of carpet!
     icon: {fileID: 0}
     outcome: 0
     resultSprite: {fileID: 4937001358346708172, guid: 4dc24fb0e50094b7a8367ff5e5118a26, type: 3}
     score: 25
+    comment: New tripping hazard unlocked!
 --- !u!60 &5834007015904778137
 PolygonCollider2D:
   m_ObjectHideFlags: 0

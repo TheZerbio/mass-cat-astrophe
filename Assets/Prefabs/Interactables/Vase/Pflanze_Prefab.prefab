@@ -633,16 +633,19 @@ MonoBehaviour:
     outcome: 0
     resultSprite: {fileID: 3596285860649878770, guid: edd0a6554e8324ea1af9daeb590905aa, type: 3}
     score: 25
+    comment: Pot gets thrown over!
   - label: Tap the pot with paws
     icon: {fileID: 0}
     outcome: 1
     resultSprite: {fileID: 1861538009206935555, guid: 3a88436951b3f416cbd120f54a8c9767, type: 3}
     score: 0
+    comment: Think you're strong enough? No...
   - label: Leaves seem yummy...
     icon: {fileID: 0}
     outcome: 0
     resultSprite: {fileID: 3408727420808655620, guid: a5a679db9002041d7a8bc50874647fc3, type: 3}
     score: 50
+    comment: Not so much but Plant is ruined :D
 --- !u!70 &-4220445049640364872
 CapsuleCollider2D:
   m_ObjectHideFlags: 0

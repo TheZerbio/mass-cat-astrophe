@@ -118,16 +118,19 @@ MonoBehaviour:
     outcome: 0
     resultSprite: {fileID: -55592512191499825, guid: 123e0582cf331432c97f1e7d68f3edf1, type: 3}
     score: 50
+    comment: Fabric ripped!
   - label: Balance on Sofa
     icon: {fileID: 0}
     outcome: 1
     resultSprite: {fileID: -6288179971597629913, guid: 9836387bf02f54e66b6df44faa85d1f4, type: 3}
     score: 0
+    comment: Ballerina! But nothing happens...
   - label: Throw Cushions down
     icon: {fileID: 0}
     outcome: 0
     resultSprite: {fileID: 3651365526380468890, guid: da77d3bb819bb4ef3a25b4e565eefe20, type: 3}
     score: 25
+    comment: Pillows went into the abyss!
 --- !u!60 &8157589964936574362
 PolygonCollider2D:
   m_ObjectHideFlags: 0
