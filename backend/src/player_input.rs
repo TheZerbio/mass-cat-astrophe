@@ -7,7 +7,7 @@ use axum::routing::get;
 use qrcode::QrCode;
 use qrcode::render::svg;
 use serde::Deserialize;
-use crate::{get_active_games, player_exists, validate_player_token, PlayerStatus, PlayerCreatedDTO};
+use crate::{get_active_games, player_exists, validate_player_token, GameState, PlayerStatus, PlayerCreatedDTO};
 use crate::game_communictaion::get_player_afk_timeout;
 use crate::PlayerStatus::{AFK, PLAYING};
 
@@ -53,7 +53,11 @@ fn on_player_input(PlayerInput{game_id, player_id, x, y}: PlayerInput){
     if (!player_exists(game_id, player_id)){ return;}
     let mut games = get_active_games();
     let game = &mut games[game_id];
+    // before /start (and while the display is gone) no tick runs: don't collect inputs,
+    // otherwise they would pile up and all land in the first tick after the start
+    let game_running = matches!(game.state, GameState::ACTIVE | GameState::IDLE);
     if game.players[player_id].is_master {
+        if !game_running { return; }
         if x.hypot(y) > 0.01{
         game.input_sum = [x, y];
         game.master_input = true;
@@ -71,24 +75,20 @@ fn on_player_input(PlayerInput{game_id, player_id, x, y}: PlayerInput){
                 player.status = PLAYING;
                 player.idle_time = 0;
             }
+            if !game_running { return; } // status above still updates in the lobby
             game.input_sum = [game.input_sum[0] + x, game.input_sum[1] + y];
             game.num_inputs+=1;
     }
 
-    // calculate player deviation
-    let similarity: f64 = distance_similarity(game.last_avg_input, [x, y]);
+    // remember this player's input for the similarity, which game_tick calculates
+    // (also while the master overrides everyone: then you're compared with the master's input)
+    if !game_running { return; }
     let player = &mut game.players[player_id];
-    player.similarities.push(similarity);
-    player.score += similarity;
+    player.tick_input_sum = [player.tick_input_sum[0] + x, player.tick_input_sum[1] + y];
+    player.tick_inputs += 1;
 
 }
 
-/// 1 = same stick position, 0 = opposite edges of the circle.
-/// Both inputs are inside the unit circle, so their distance is at most 2.
-fn distance_similarity(a: [f64; 2], b: [f64; 2]) -> f64 {
-    let distance = (a[0] - b[0]).hypot(a[1] - b[1]);
-    (1.0 - distance / 2.0).clamp(0.0, 1.0)
-}
 fn norm_inputs(mut input: PlayerInput)->PlayerInput {
     let distance = (input.x * input.x + input.y * input.y).sqrt();
     if distance > 1. {

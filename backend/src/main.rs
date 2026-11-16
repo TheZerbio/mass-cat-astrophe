@@ -5,6 +5,7 @@ use axum::http::StatusCode;
 use axum::response::Html;
 use axum::routing::get;
 use serde::{Deserialize, Serialize};
+use tower_http::cors::{Any, CorsLayer};
 use crate::game_communictaion::game_ui_routing;
 use crate::status::{status_page};
 
@@ -31,6 +32,10 @@ struct Player{
     token: u16, // used to detect stale sessions and kick players rather than a security measure
     status: PlayerStatus,
     idle_time: usize,
+    #[serde(skip_serializing)]
+    tick_input_sum: [f64; 2], // this player's inputs since the last tick, compared in game_tick
+    #[serde(skip_serializing)]
+    tick_inputs: usize,
 }
 
 enum GameState {
@@ -112,6 +117,12 @@ fn routes() -> Router {
 
     // css files loaded from html
     router = router.route("/status.css", get(status::status_css));
+    router = router.layer(
+        CorsLayer::new()
+            .allow_origin(Any)
+            .allow_origin(Any)
+            .allow_headers(Any)
+    );
     router
 }
 
@@ -168,7 +179,9 @@ async fn register_player(Path((game_id, name)): Path<(usize, String)>)
                     token,
                     status: PlayerStatus::CREATED,
                     idle_time: 0,
-            similarities_agg: vec![]
+            similarities_agg: vec![],
+            tick_input_sum: [0.0; 2],
+            tick_inputs: 0,
         });
     return Ok(Json(PlayerCreatedDTO{
         name: name_copy,

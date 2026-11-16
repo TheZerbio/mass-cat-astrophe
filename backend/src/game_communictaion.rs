@@ -107,14 +107,41 @@ async fn gui_ws_handler(mut socket: WebSocket, game_id: usize) {
 fn game_tick(game: &mut Game) -> JSONBody{
     if (game.num_inputs == 0) {
         game.state = GameState::IDLE;
+        // e.g. only the master sent a near-zero input: nothing to compare with, start the next tick fresh
+        for player in game.players.iter_mut() {
+            player.tick_input_sum = [0.0; 2];
+            player.tick_inputs = 0;
+        }
         return JSONBody{x:0.0, y:0.0, num_inputs: 0 }
     }
+    game.state = ACTIVE;
     game.last_avg_input = [game.input_sum[0] / game.num_inputs as f64, game.input_sum[1] / game.num_inputs as f64];
     game.input_sum = [0., 0.];
     let last_num_input = game.num_inputs;
     game.num_inputs = 0;
     game.master_input = false;
-    JSONBody{x: game.last_avg_input[0], y: game.last_avg_input[1], num_inputs: last_num_input }
+
+    // compare every player who sent something in this tick with the input that is actually sent.
+    // Same tick on both sides, so there's no lag (a single player always gets 1.0)
+    let avg = game.last_avg_input;
+    for player in game.players.iter_mut().filter(|p| p.tick_inputs > 0) {
+        let n = player.tick_inputs as f64;
+        let own = [player.tick_input_sum[0] / n, player.tick_input_sum[1] / n];
+        let similarity = distance_similarity(avg, own);
+        player.similarities.push(similarity);
+        player.score += similarity;
+        player.tick_input_sum = [0.0; 2];
+        player.tick_inputs = 0;
+    }
+
+    JSONBody{x: avg[0], y: avg[1], num_inputs: last_num_input }
+}
+
+/// 1 = same stick position, 0 = opposite edges of the circle.
+/// Both inputs are inside the unit circle, so their distance is at most 2.
+fn distance_similarity(a: [f64; 2], b: [f64; 2]) -> f64 {
+    let distance = (a[0] - b[0]).hypot(a[1] - b[1]);
+    (1.0 - distance / 2.0).clamp(0.0, 1.0)
 }
 
 #[derive(Deserialize)]
