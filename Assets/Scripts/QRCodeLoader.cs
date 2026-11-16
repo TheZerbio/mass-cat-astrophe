@@ -7,11 +7,16 @@ public class QRCodeLoader : MonoBehaviour
     private GameManager gameManager;
     public Image QRCodeImage;
     public GameObject PlayButton;
-    
+    public GameObject QuitButton;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         gameManager = GameObject.Find("PersistantGameObjects").GetComponent<GameManager>();
+#if UNITY_WEBGL && !UNITY_EDITOR
+        // a browser tab can't be closed by the game, Application.Quit() does nothing there
+        if (QuitButton != null) QuitButton.SetActive(false);
+#endif
     }
 
     public void ShowQrCode()
