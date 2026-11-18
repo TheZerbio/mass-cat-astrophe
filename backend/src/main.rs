@@ -75,18 +75,18 @@ fn validate_player_token(game_id: usize, player_id: usize, token: u16) ->bool{
 static ACTIVE_GAMES: LazyLock<Mutex<Vec<Game>>> = LazyLock::new(|| Mutex::new(vec![]));
 
 #[inline]
-fn get_active_games() ->  MutexGuard<'static, Vec<Game>> {
+fn get_games() ->  MutexGuard<'static, Vec<Game>> {
     ACTIVE_GAMES.lock().unwrap_or_else(|poisoned| poisoned.into_inner())
 }
 fn with_player<R>(game_id:usize, player_id:usize, f: impl FnOnce(&mut Player)->R)->Option<R>{
-    let mut active_games = get_active_games();
+    let mut active_games = get_games();
     let game = active_games.get_mut(game_id)?;
     let player = game.players.get_mut(player_id)?;
     Some(f(player))
 }
 
 fn with_game<R>(game_id:usize, mut f: impl FnOnce(&mut Game)->R)->Option<R>{
-    let mut active_games = get_active_games();
+    let mut active_games = get_games();
     let game = active_games.get_mut(game_id)?;
     Some(f(game))
 }
@@ -129,7 +129,7 @@ fn routes() -> Router {
 
 async fn create_new_game()-> Json<serde_json::Value> {
 // find first inactive game
-    let mut  ag = get_active_games();
+    let mut  ag = get_games();
     let mut free_slot = ag.len();
     for game in ag.iter_mut(){
         if !is_active(game) {
@@ -164,7 +164,7 @@ async fn register_player(Path((game_id, name)): Path<(usize, String)>)
     if!game_exists(game_id) {
         return Err((StatusCode::GONE, "no active game with that id"))}
     
-    let mut ag = get_active_games();
+    let mut ag = get_games();
     if ag[game_id].players.iter().any(|player| player.name == name){
         return  Err((StatusCode::CONFLICT,"player name already exists"));
     }
@@ -191,20 +191,17 @@ async fn register_player(Path((game_id, name)): Path<(usize, String)>)
 }
 
 async fn elevate_player(Path((game_id, name)): Path<(usize, String)>){
-    if !game_exists(game_id) {return;}
-    let mut ag = get_active_games();
-    ag[game_id].players.iter_mut().for_each(
+    with_game(game_id, |game|{game.players.iter_mut().for_each(
         |player| {
-        player.is_master = if player.name == name {!player.is_master} else {false};
-        println!("Player {} is changed master to {}", name, player.is_master);
-        })
-
+            player.is_master = if player.name == name {!player.is_master} else {false};
+            println!("Player {} is changed master to {}", name, player.is_master);
+        })});
 }
 
 
 async fn remove_player(Path((game_id, name)): Path<(usize, String)>){
     if !game_exists(game_id) {return;}
-    let mut ag = get_active_games();
+    let mut ag = get_games();
     ag[game_id].players.iter_mut().filter(|player| player.name == name).for_each(
         | player| {player.token = 0;/* removing would change the indices, but removing
         the token makes his session stale*/ player.status = PlayerStatus::DISCONNECTED;}
@@ -213,18 +210,16 @@ async fn remove_player(Path((game_id, name)): Path<(usize, String)>){
 }
 
 async fn close_game(Path(game_id): Path<usize>){
-    if !game_exists(game_id){return;}
-    let mut ag = get_active_games();
-    ag[game_id].state = GameState::STOPPED;
+    with_game(game_id, |game| game.state = GameState::STOPPED);
 }
 
 fn game_exists(game_id: usize)->bool{
-    let ag = get_active_games();
+    let ag = get_games();
     return game_id < ag.len() && is_active(&ag[game_id]);
 }
 fn player_exists(game_id:usize, player_id: usize )->bool{
     if (game_exists(game_id)) {
-        let ag = get_active_games();
+        let ag = get_games();
         if ag[game_id].players.len() > player_id {return true;}
     }
     return false;
