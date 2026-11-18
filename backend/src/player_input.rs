@@ -1,5 +1,5 @@
 use axum::extract::{Path, Query, WebSocketUpgrade};
-use axum::extract::ws::{Message, WebSocket};
+use axum::extract::ws::{CloseFrame, Message, WebSocket};
 use axum::http::{header, StatusCode};
 use axum::response::{Html, IntoResponse, Response};
 use axum::{Json, Router};
@@ -7,7 +7,7 @@ use axum::routing::get;
 use qrcode::QrCode;
 use qrcode::render::svg;
 use serde::Deserialize;
-use crate::{get_active_games, player_exists, validate_player_token, GameState, PlayerStatus, PlayerCreatedDTO};
+use crate::{get_games, player_exists, validate_player_token, GameState, PlayerStatus, PlayerCreatedDTO, with_game, Game};
 use crate::game_communictaion::get_player_afk_timeout;
 use crate::PlayerStatus::{AFK, PLAYING};
 
@@ -39,11 +39,13 @@ async fn joy_ws_handler(mut socket: WebSocket, game_id: usize, player_id: usize,
         let Message::Text(content) = message else {continue};
         let Ok(JSONBody{x, y, token}) = serde_json::from_str::<JSONBody>(content.as_str()) else { continue };
 
-        if (!validate_player_token(game_id, player_id, token)){
+        if (!validate_player_token(game_id, player_id, token)
+            || send_to_leaderboard_on_close(&mut socket, game_id).await ){
             return;
         }
 
         let mut input = PlayerInput{game_id, player_id, x, y};
+
         input = norm_inputs(input);
 
         on_player_input(input);
@@ -51,13 +53,14 @@ async fn joy_ws_handler(mut socket: WebSocket, game_id: usize, player_id: usize,
 }
 fn on_player_input(PlayerInput{game_id, player_id, x, y}: PlayerInput){
     if (!player_exists(game_id, player_id)){ return;}
-    let mut games = get_active_games();
+    let mut games = get_games();
     let game = &mut games[game_id];
     // before /start (and while the display is gone) no tick runs: don't collect inputs,
     // otherwise they would pile up and all land in the first tick after the start
     let game_running = matches!(game.state, GameState::ACTIVE | GameState::IDLE);
+    if !game_running { return; }
     if game.players[player_id].is_master {
-        if !game_running { return; }
+
         if x.hypot(y) > 0.01{
         game.input_sum = [x, y];
         game.master_input = true;
@@ -75,14 +78,10 @@ fn on_player_input(PlayerInput{game_id, player_id, x, y}: PlayerInput){
                 player.status = PLAYING;
                 player.idle_time = 0;
             }
-            if !game_running { return; } // status above still updates in the lobby
             game.input_sum = [game.input_sum[0] + x, game.input_sum[1] + y];
             game.num_inputs+=1;
     }
 
-    // remember this player's input for the similarity, which game_tick calculates
-    // (also while the master overrides everyone: then you're compared with the master's input)
-    if !game_running { return; }
     let player = &mut game.players[player_id];
     player.tick_input_sum = [player.tick_input_sum[0] + x, player.tick_input_sum[1] + y];
     player.tick_inputs += 1;
@@ -116,7 +115,18 @@ struct PlayerDTO{
     player_id: usize,
     token: u16,
 }
-async fn serve_leaderboard(Query(PlayerDTO{game_id, player_id, token}): Query<PlayerDTO>)->Html<String>{
+async fn serve_leaderboard(Query(_): Query<PlayerDTO>)->Html<String>{
     const PAGE: &str = include_str!("../static/leaderboard.html");
     return Html(PAGE.to_string());
+}
+
+async fn send_to_leaderboard_on_close(socket: &mut WebSocket, game_id: usize)-> bool{
+    let stopped =
+    with_game(game_id, |game| {
+        matches!(game.state, GameState::STOPPED)
+    }).unwrap_or(false);
+     if stopped { // after the game mutex is returned
+         let _ = socket.send(Message::Close(Some(CloseFrame{code: 4000, reason: "game ended".into()}))).await;
+     }
+    stopped
 }

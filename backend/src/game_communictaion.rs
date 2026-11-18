@@ -6,7 +6,7 @@ use axum::{Json, Router};
 use axum::routing::{get, post};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use crate::{game_exists, get_active_games, GameState, with_game, Game, Player};
+use crate::{game_exists, get_games, GameState, with_game, Game, Player};
 use crate::GameState::{ACTIVE, IDLE, RECONNECTING, STARTING};
 
 const UPDATES_PER_SECOND: u64 = 25;
@@ -172,18 +172,18 @@ async fn start_game(Path(game_id): Path<usize>){
 }
 
 fn game_in_progress(game_id: usize)->bool{
-    let mut games = get_active_games();
-    let game = &mut games[game_id];
-    match game.state {
-        ACTIVE => true,
-        STARTING => false,
-        RECONNECTING => true,
-        IDLE => true,
-        GameState::CREATED => {game.state = STARTING; return false;},
-        GameState::DISCONNECTED => false,
-        GameState::STOPPED => false,
-        _ => false,
-    }
+   with_game(game_id, |game| {
+       match game.state {
+           ACTIVE => true,
+           STARTING => false,
+           RECONNECTING => true,
+           IDLE => true,
+           GameState::CREATED => {game.state = STARTING; return false;},
+           GameState::DISCONNECTED => false,
+           GameState::STOPPED => false,
+           _ => false,
+       }
+   }).unwrap_or(false)
 }
 
 fn set_reconnecting(game_id: usize){

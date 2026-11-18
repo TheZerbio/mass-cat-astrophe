@@ -233,15 +233,22 @@
                 ws_connected = true; // so in the meantime no new one is opened, send checks if it was successful
                 // the handlers have to be set on every new socket, otherwise only the first one can reconnect
                 ws.onopen = () => console.log("connected to game!");
-                ws.onclose = () => ws_disconnect(socket);
-                ws.onerror = () => ws_disconnect(socket);
+                ws.onclose = (err) => ws_disconnect(err);
+                ws.onerror = (err) => ws_disconnect(err);
             }
 
         }
 
-        function ws_disconnect(socket) {
-            if (socket !== ws || !ws_connected) return; // old socket, or already handled (error + close both fire)
-            console.log("disconnected from game!");
+        function ws_disconnect(err) {
+            if (!ws_connected) return; // old socket, or already handled (error + close both fire)
+            console.log("disconnected from game!")
+            if (err.code === 4000){
+                // if socked closed because game closed
+                console.log("break up called")
+                is_healthy = false; // stop from trying to reconnect
+                window.location.href=`/stats?game_id=${game_id}&player_id=${player_id}&token=${token}`;
+                return;
+            }
             fetch(`/player/check_integrity/${game_id}/${player_id}/${token}`).then(r => {
                 if (r.status === 200) {
                     is_healthy = true;

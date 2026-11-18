@@ -1,7 +1,7 @@
 use axum::response::{Html, IntoResponse};
 use axum::http::header;
 
-use crate::{get_active_games, GameState, is_active, PlayerStatus};
+use crate::{get_games, GameState, is_active, PlayerStatus};
 
 const PAGE: &str = include_str!("../static/status.html");
 const CSS: &str = include_str!("../static/status.css");
@@ -10,7 +10,7 @@ const QR_ICON: &str = r#"<svg viewBox="0 0 24 24" fill="none" stroke="currentCol
 
 // GET /status
 pub async fn status_page() -> Html<String> {
-    let games = get_active_games();
+    let games = get_games();
     let mut html = String::new();
 
     for game in games.iter() {
